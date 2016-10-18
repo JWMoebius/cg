@@ -4,6 +4,7 @@
 #include "application.hpp"
 #include "model.hpp"
 #include "structs.hpp"
+#include <vector>
 
 // gpu representation of model
 class ApplicationSolar : public Application {
@@ -26,8 +27,10 @@ class ApplicationSolar : public Application {
   void initializeShaderPrograms();
   void initializeGeometry();
   void updateView();
+  glm::fmat4 uploadPlanetTransforms(planet const& newPlanet);
 
   // cpu representation of model
+  std::vector<planet> planet_vector;
   model_object planet_object;
 };
 

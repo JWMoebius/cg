@@ -3,13 +3,20 @@
 
 #include <map>
 #include <glbinding/gl/gl.h>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/matrix_inverse.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 // use gl definitions from glbinding
 using namespace gl;
 
 struct planet {
+  planet(){}
+  planet(float in_size, float in_v_rotation, glm::fvec3 in_distance) : size{in_size}, v_rotation{in_v_rotation}, distance_origin{in_v_rotation}    {}
+  
   float size;
   float v_rotation;
-  float distance_origin;
+  glm::fvec3 distance_origin;
 };
 
 // gpu representation of model
