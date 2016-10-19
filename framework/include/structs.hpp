@@ -11,9 +11,6 @@
 using namespace gl;
 
 struct planet {
-  planet(){}
-  planet(float in_size, float in_v_rotation, glm::fvec3 in_distance) : size{in_size}, v_rotation{in_v_rotation}, distance_origin{in_v_rotation}    {}
-  
   float size;
   float v_rotation;
   glm::fvec3 distance_origin;
