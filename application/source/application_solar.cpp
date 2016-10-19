@@ -6,7 +6,7 @@
 #include "model_loader.hpp"
 
 #include <glbinding/gl/gl.h>
-// use gl definitions from glbinding 
+// use gl definitions from glbinding
 using namespace gl;
 
 //dont load gl bindings from glfw
@@ -32,10 +32,10 @@ void ApplicationSolar::render() const {
 	glUseProgram(m_shaders.at("planet").handle);
 
 	//TESTCODE - BEGIN
-	planet Bern(1.5f, 1.5f, glm::fvec3 { 1.0f,1.0f,1.5f });
+	planet Bern{1.5f, 1.5f, glm::fvec3{ 1.0f, 1.0f, 1.5f }};
 	std::vector<planet> test;
-	test.push_back(Bern);
-	
+	// test.push_back(Bern);
+
 	for (auto planet : test) {
 
 		glm::fmat4 model_matrix = uploadPlanetTransforms(planet);
@@ -53,7 +53,7 @@ void ApplicationSolar::render() const {
 
 		// draw bound vertex array using bound shader
 		glDrawElements(planet_object.draw_mode, planet_object.num_elements, model::INDEX.type, NULL);
-	
+
 }
 
 void ApplicationSolar::updateView() {
@@ -139,7 +139,7 @@ void ApplicationSolar::initializeGeometry() {
 
 	// store type of primitive to draw
 	planet_object.draw_mode = GL_TRIANGLES;
-	// transfer number of indices to model object 
+	// transfer number of indices to model object
 	planet_object.num_elements = GLsizei(planet_model.indices.size());
 }
 
@@ -149,9 +149,9 @@ ApplicationSolar::~ApplicationSolar() {
 	glDeleteVertexArrays(1, &planet_object.vertex_AO);
 }
 
-glm::fmat4 ApplicationSolar::uploadPlanetTransforms(planet const& pl) {
+glm::fmat4 ApplicationSolar::updatePlanetTransforms(planet const& pl) const {
 	glm::fmat4 model_matrix = glm::rotate(glm::fmat4{}, float(glfwGetTime()) * pl.v_rotation, glm::fvec3{ 0.0f, 1.0f, 0.0f });
-	return model_matrix = glm::translate(model_matrix, pl.distance_origin);
+	return glm::translate(model_matrix, pl.distance_origin);
 }
 
 
