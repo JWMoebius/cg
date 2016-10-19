@@ -23,22 +23,18 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
 	:Application{ resource_path }
 	, planet_object{}, planet_vector{}
 {
-	initializeGeometry();
-	initializeShaderPrograms();
+	planet Bern{1.5f, 1.5f, glm::fvec3{ 1.0f, 1.0f, 1.5f }};
+  planet_vector.push_back(Bern);
+  initializeGeometry();
+  initializeShaderPrograms();
 }
 
 void ApplicationSolar::render() const {
-	// bind shader to upload uniforms
-	glUseProgram(m_shaders.at("planet").handle);
+  // bind shader to upload uniforms
+  glUseProgram(m_shaders.at("planet").handle);
 
-	//TESTCODE - BEGIN
-	planet Bern{1.5f, 1.5f, glm::fvec3{ 1.0f, 1.0f, 1.5f }};
-	std::vector<planet> test;
-	// test.push_back(Bern);
-
-	for (auto planet : test) {
-
-		glm::fmat4 model_matrix = uploadPlanetTransforms(planet);
+	for (auto planet : planet_vector) {
+		glm::fmat4 model_matrix = updatePlanetTransforms(planet);
 
 		glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
 			1, GL_FALSE, glm::value_ptr(model_matrix));
@@ -48,6 +44,7 @@ void ApplicationSolar::render() const {
 		glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("NormalMatrix"),
 			1, GL_FALSE, glm::value_ptr(normal_matrix));
 	}
+
 		// bind the VAO to draw
 		glBindVertexArray(planet_object.vertex_AO);
 
