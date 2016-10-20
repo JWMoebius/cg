@@ -31,7 +31,7 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
 	planet Mars{ 0.5f, 1.5f, glm::fvec3{ 25.1f, 0.0f, 25.1f } };
 	planet Uranus{ 0.2f, 1.5f, glm::fvec3{ 30.5f, 0.0f, 30.5f } };
 	planet Juppiter{ 0.1f, 1.5f, glm::fvec3{ 35.2f, 0.0f, 35.5f } };
-	planet Moon{ 0.3f, 1.5f, glm::fvec3{ 6.3, 0.0f, 5.3f } };
+	planet Moon{ 0.05f, 1.5f, glm::fvec3{ 7.3, 0.0f, 5.3f } };
 
 	planet_vector.push_back(Sun); 
     planet_vector.push_back(Earth);
