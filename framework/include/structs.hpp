@@ -10,6 +10,7 @@
 // use gl definitions from glbinding
 using namespace gl;
 
+//planet representation 
 struct planet {
   float size;
   float v_rotation;
