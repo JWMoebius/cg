@@ -31,7 +31,8 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
 	planet Mars{ 0.5f, 1.5f, glm::fvec3{ 25.1f, 0.0f, 25.1f } };
 	planet Uranus{ 0.2f, 1.5f, glm::fvec3{ 30.5f, 0.0f, 30.5f } };
 	planet Juppiter{ 0.1f, 1.5f, glm::fvec3{ 35.2f, 0.0f, 35.5f } };
-	
+	planet Moon{ 0.3f, 1.5f, glm::fvec3{ 6.3, 0.0f, 5.3f } };
+
 	planet_vector.push_back(Sun); 
     planet_vector.push_back(Earth);
     planet_vector.push_back(Venus);
@@ -40,6 +41,8 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
 	planet_vector.push_back(Mars);
 	planet_vector.push_back(Uranus);
 	planet_vector.push_back(Juppiter);
+	planet_vector.push_back(Moon);
+
 
   initializeGeometry();
   initializeShaderPrograms();
@@ -51,18 +54,7 @@ void ApplicationSolar::render() const {
 
   //Draw for all predefined planets in planet_vector depending on their attributes
   for (auto planet : planet_vector) {
-	  glm::fmat4 model_matrix = updatePlanetTransforms(planet);
-
-	  glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
-		  1, GL_FALSE, glm::value_ptr(model_matrix));
-
-
-	  // extra matrix for normal transformation to keep them orthogonal to surface
-	  glm::fmat4 normal_matrix = glm::inverseTranspose(glm::inverse(m_view_transform) * model_matrix);
-	  
-	  glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("NormalMatrix"),
-		  1, GL_FALSE, glm::value_ptr(normal_matrix));
-
+	  glm::fmat4 matrix = updatePlanetTransforms(planet);
 
 	  // bind the VAO to draw
 	  glBindVertexArray(planet_object.vertex_AO);
@@ -169,7 +161,20 @@ glm::fmat4 ApplicationSolar::updatePlanetTransforms(planet const& pl) const {
 	//Set for each planet the individual mode_matrix
 	glm::fmat4 model_matrix = glm::rotate(glm::fmat4{}, float(glfwGetTime()) * pl.v_rotation, glm::fvec3{ 0.0f, 1.0f, 0.0f });
 	model_matrix = glm::scale(model_matrix, glm::fvec3{pl.size}); // Scales the matrix depending on the size of the planet
-	return glm::translate(model_matrix, pl.distance_origin);
+	model_matrix = glm::translate(model_matrix, pl.distance_origin);
+
+	glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
+		1, GL_FALSE, glm::value_ptr(model_matrix));
+
+	// extra matrix for normal transformation to keep them orthogonal to surface
+	glm::fmat4 normal_matrix = glm::inverseTranspose(glm::inverse(m_view_transform) * model_matrix);
+
+	glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("NormalMatrix"),
+		1, GL_FALSE, glm::value_ptr(normal_matrix));
+
+	return normal_matrix;
+
+
 }
 
 
