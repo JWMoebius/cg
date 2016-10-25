@@ -31,7 +31,9 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
 	planet Mars{ 0.5f, 1.5f, glm::fvec3{ 25.1f, 0.0f, 25.1f }, {} };
 	planet Uranus{ 0.2f, 1.5f, glm::fvec3{ 30.5f, 0.0f, 30.5f }, {} };
 	planet Jupiter{ 0.1f, 1.5f, glm::fvec3{ 35.2f, 0.0f, 35.5f }, {} };
-	// planet Moon{ 0.05f, 1.5f, glm::fvec3{ 7.3, 0.0f, 5.3f } };
+
+	moon Moon{ 0.05f, 1.5f, glm::fvec3{ 7.3, 0.0f, 5.3f } };
+	Saturn.moons.push_back(Moon);
 
 	planet_vector.push_back(Sun);
 	planet_vector.push_back(Earth);
@@ -53,12 +55,12 @@ void ApplicationSolar::render() const {
 	glUseProgram(m_shaders.at("planet").handle);
 
 	//Draw for all predefined planets in planet_vector depending on their attributes
-	glm::fmat4 planet_matrix;
+	glm::fmat4 planet_mat;
 	for (auto planet : planet_vector) {
-		uploadPlanetTransforms(planet);
+		planet_mat = uploadPlanetTransforms(planet);
 
 		for (auto moon : planet.moons) {
-			uploadMoonTransforms(moon);
+			uploadMoonTransforms(moon, planet_mat);
 		}
 
 		// bind the VAO to draw
@@ -162,7 +164,7 @@ ApplicationSolar::~ApplicationSolar() {
 	glDeleteVertexArrays(1, &planet_object.vertex_AO);
 }
 
-void ApplicationSolar::uploadPlanetTransforms(planet const& pl) const {
+glm::fmat4 ApplicationSolar::uploadPlanetTransforms(planet const& pl) const {
 	glm::fmat4 model_matrix = glm::rotate(glm::fmat4{}, float(glfwGetTime()) * pl.rotation_velocity, glm::fvec3{ 0.0f, 1.0f, 0.0f });
 	model_matrix *= glm::scale(glm::fmat4{}, glm::fvec3{pl.size}); // Scales the matrix depending on the size of the planet
 	model_matrix *= glm::translate(glm::fmat4{}, pl.distance_to_origin);
@@ -175,9 +177,15 @@ void ApplicationSolar::uploadPlanetTransforms(planet const& pl) const {
 
 	glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("NormalMatrix"),
 		1, GL_FALSE, glm::value_ptr(normal_matrix));
+
+	return model_matrix;
 }
 
-void ApplicationSolar::uploadMoonTransforms(moon const& mo) const {
+void ApplicationSolar::uploadMoonTransforms(moon const& mo, glm::fmat4 const& pl_mat) const {
+	// Rotate moon around y-axis through its planet.
+	glm::fmat4 model_matrix = glm::rotate(glm::fmat4{}, float(glfwGetTime()) * mo.rotation_velocity,
+		glm::fvec3{pl_mat * glm::fvec4{0.0, 1.0, 0.0, 1.0}});
+
 
 }
 
