@@ -55,7 +55,7 @@ void ApplicationSolar::render() const {
 	//Draw for all predefined planets in planet_vector depending on their attributes
 	glm::fmat4 planet_matrix;
 	for (auto planet : planet_vector) {
-		planet_matrix = uploadPlanetTransforms(planet);
+		uploadPlanetTransforms(planet);
 
 		// bind the VAO to draw
 		glBindVertexArray(planet_object.vertex_AO);
@@ -158,7 +158,7 @@ ApplicationSolar::~ApplicationSolar() {
 	glDeleteVertexArrays(1, &planet_object.vertex_AO);
 }
 
-glm::fmat4 ApplicationSolar::uploadPlanetTransforms(planet const& pl) const {
+void ApplicationSolar::uploadPlanetTransforms(planet const& pl) const {
 	glm::fmat4 model_matrix = glm::rotate(glm::fmat4{}, float(glfwGetTime()) * pl.rotation_velocity, glm::fvec3{ 0.0f, 1.0f, 0.0f });
 	model_matrix *= glm::scale(glm::fmat4{}, glm::fvec3{pl.size}); // Scales the matrix depending on the size of the planet
 	model_matrix *= glm::translate(glm::fmat4{}, pl.distance_to_origin);
@@ -171,8 +171,6 @@ glm::fmat4 ApplicationSolar::uploadPlanetTransforms(planet const& pl) const {
 
 	glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("NormalMatrix"),
 		1, GL_FALSE, glm::value_ptr(normal_matrix));
-
-	return normal_matrix;
 }
 
 void ApplicationSolar::uploadMoonTransforms(moon const& mo) const {

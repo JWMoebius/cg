@@ -26,7 +26,7 @@ class ApplicationSolar : public Application {
   void initializeShaderPrograms();
   void initializeGeometry();
   void updateView();
-  glm::fmat4 uploadPlanetTransforms(planet const&) const;
+  void uploadPlanetTransforms(planet const&) const;
   void uploadMoonTransforms(moon const&) const;
 
   // cpu representation of model
