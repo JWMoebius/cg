@@ -33,10 +33,10 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
 	planet Juppiter{ 0.1f, 1.5f, glm::fvec3{ 35.2f, 0.0f, 35.5f } };
 	planet Moon{ 0.05f, 1.5f, glm::fvec3{ 7.3, 0.0f, 5.3f } };
 
-	planet_vector.push_back(Sun); 
-    planet_vector.push_back(Earth);
-    planet_vector.push_back(Venus);
-    planet_vector.push_back(Merkur); 
+	planet_vector.push_back(Sun);
+	planet_vector.push_back(Earth);
+	planet_vector.push_back(Venus);
+	planet_vector.push_back(Merkur);
 	planet_vector.push_back(Saturn);
 	planet_vector.push_back(Mars);
 	planet_vector.push_back(Uranus);
@@ -44,24 +44,25 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
 	planet_vector.push_back(Moon);
 
 
-  initializeGeometry();
-  initializeShaderPrograms();
+	initializeGeometry();
+	initializeShaderPrograms();
 }
 
 void ApplicationSolar::render() const {
-  // bind shader to upload uniforms
-  glUseProgram(m_shaders.at("planet").handle);
+	// bind shader to upload uniforms
+	glUseProgram(m_shaders.at("planet").handle);
 
-  //Draw for all predefined planets in planet_vector depending on their attributes
-  for (auto planet : planet_vector) {
-	  glm::fmat4 matrix = updatePlanetTransforms(planet);
+	//Draw for all predefined planets in planet_vector depending on their attributes
+	glm::fmat4 planet_matrix;
+	for (auto planet : planet_vector) {
+		planet_matrix = uploadPlanetTransforms(planet);
 
-	  // bind the VAO to draw
-	  glBindVertexArray(planet_object.vertex_AO);
+		// bind the VAO to draw
+		glBindVertexArray(planet_object.vertex_AO);
 
-	  // draw bound vertex array using bound shader
-	  glDrawElements(planet_object.draw_mode, planet_object.num_elements, model::INDEX.type, NULL);
-  }
+		// draw bound vertex array using bound shader
+		glDrawElements(planet_object.draw_mode, planet_object.num_elements, model::INDEX.type, NULL);
+	}
 }
 
 void ApplicationSolar::updateView() {
@@ -157,11 +158,10 @@ ApplicationSolar::~ApplicationSolar() {
 	glDeleteVertexArrays(1, &planet_object.vertex_AO);
 }
 
-glm::fmat4 ApplicationSolar::updatePlanetTransforms(planet const& pl) const {
-	//Set for each planet the individual mode_matrix
-	glm::fmat4 model_matrix = glm::rotate(glm::fmat4{}, float(glfwGetTime()) * pl.v_rotation, glm::fvec3{ 0.0f, 1.0f, 0.0f });
-	model_matrix = glm::scale(model_matrix, glm::fvec3{pl.size}); // Scales the matrix depending on the size of the planet
-	model_matrix = glm::translate(model_matrix, pl.distance_origin);
+glm::fmat4 ApplicationSolar::uploadPlanetTransforms(planet const& pl) const {
+	glm::fmat4 model_matrix = glm::rotate(glm::fmat4{}, float(glfwGetTime()) * pl.rotation_velocity, glm::fvec3{ 0.0f, 1.0f, 0.0f });
+	model_matrix *= glm::scale(glm::fmat4{}, glm::fvec3{pl.size}); // Scales the matrix depending on the size of the planet
+	model_matrix *= glm::translate(glm::fmat4{}, pl.distance_to_origin);
 
 	glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
 		1, GL_FALSE, glm::value_ptr(model_matrix));
@@ -173,7 +173,9 @@ glm::fmat4 ApplicationSolar::updatePlanetTransforms(planet const& pl) const {
 		1, GL_FALSE, glm::value_ptr(normal_matrix));
 
 	return normal_matrix;
+}
 
+void ApplicationSolar::uploadMoonTransforms(moon const& mo) const {
 
 }
 

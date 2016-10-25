@@ -6,15 +6,23 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <vector>
 
 // use gl definitions from glbinding
 using namespace gl;
 
-//planet representation 
+struct moon {
+  float size;
+  float rotation_velocity;
+  glm::fvec3 distance_to_planet;
+};
+
+//planet representation
 struct planet {
   float size;
-  float v_rotation;
-  glm::fvec3 distance_origin;
+  float rotation_velocity;
+  glm::fvec3 distance_to_origin;
+  // std::vector<moon> moons;
 };
 
 // gpu representation of model
