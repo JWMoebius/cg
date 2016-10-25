@@ -1,27 +1,6 @@
-# Compiled Object files
-*.slo
-*.lo
+build
+install
 *.o
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
-
-# build directory
-/build
+*.sublime-workspace
+*~
+.DS_Store
