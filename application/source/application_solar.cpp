@@ -23,15 +23,15 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
 	:Application{ resource_path }
 	, planet_object{}, planet_vector{}
 {
-	planet Sun{ 0.5f, 5.5f, glm::fvec3{ 0.0, 0.0f, 0.0f } };
-	planet Earth{ 0.1f, 1.5f, glm::fvec3{ 5.3f, 0.0f, 5.3f } };
-	planet Venus{ 0.1f, 1.5f, glm::fvec3{ 10.6f, 0.0f, 10.6f } };
-	planet Merkur{ 0.1f, 1.5f, glm::fvec3{ 15.0f, 0.0f, 15.0f } };
-	planet Saturn{1.5f, 1.5f, glm::fvec3{ 20.0f, 0.0f, 20.0f }};
-	planet Mars{ 0.5f, 1.5f, glm::fvec3{ 25.1f, 0.0f, 25.1f } };
-	planet Uranus{ 0.2f, 1.5f, glm::fvec3{ 30.5f, 0.0f, 30.5f } };
-	planet Juppiter{ 0.1f, 1.5f, glm::fvec3{ 35.2f, 0.0f, 35.5f } };
-	planet Moon{ 0.05f, 1.5f, glm::fvec3{ 7.3, 0.0f, 5.3f } };
+	planet Sun{ 0.5f, 5.5f, glm::fvec3{ 0.0, 0.0f, 0.0f }, {} };
+	planet Earth{ 0.1f, 1.5f, glm::fvec3{ 5.3f, 0.0f, 5.3f }, {} };
+	planet Venus{ 0.1f, 1.5f, glm::fvec3{ 10.6f, 0.0f, 10.6f }, {} };
+	planet Merkur{ 0.1f, 1.5f, glm::fvec3{ 15.0f, 0.0f, 15.0f }, {} };
+	planet Saturn{1.5f, 1.5f, glm::fvec3{ 20.0f, 0.0f, 20.0f }, {} };
+	planet Mars{ 0.5f, 1.5f, glm::fvec3{ 25.1f, 0.0f, 25.1f }, {} };
+	planet Uranus{ 0.2f, 1.5f, glm::fvec3{ 30.5f, 0.0f, 30.5f }, {} };
+	planet Juppiter{ 0.1f, 1.5f, glm::fvec3{ 35.2f, 0.0f, 35.5f }, {} };
+	// planet Moon{ 0.05f, 1.5f, glm::fvec3{ 7.3, 0.0f, 5.3f } };
 
 	planet_vector.push_back(Sun);
 	planet_vector.push_back(Earth);
@@ -41,7 +41,7 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
 	planet_vector.push_back(Mars);
 	planet_vector.push_back(Uranus);
 	planet_vector.push_back(Juppiter);
-	planet_vector.push_back(Moon);
+	// planet_vector.push_back(Moon);
 
 
 	initializeGeometry();
@@ -56,6 +56,10 @@ void ApplicationSolar::render() const {
 	glm::fmat4 planet_matrix;
 	for (auto planet : planet_vector) {
 		uploadPlanetTransforms(planet);
+
+		for (auto moon : planet.moons) {
+			uploadMoonTransforms(moon);
+		}
 
 		// bind the VAO to draw
 		glBindVertexArray(planet_object.vertex_AO);

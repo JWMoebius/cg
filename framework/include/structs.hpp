@@ -22,7 +22,7 @@ struct planet {
   float size;
   float rotation_velocity;
   glm::fvec3 distance_to_origin;
-  // std::vector<moon> moons;
+  std::vector<moon> moons;
 };
 
 // gpu representation of model
