@@ -81,6 +81,13 @@ void ApplicationSolar::render() const {
 		// draw bound vertex array using bound shader
 		glDrawElements(planet_object.draw_mode, planet_object.num_elements, model::INDEX.type, NULL);
 	}
+
+
+	//Stars:
+	glUseProgram(m_shaders.at("star").handle);
+
+	glBindVertexArray(star_object.vertex_AO);
+	glDrawElements(star_object.draw_mode, star_vector.size(), GL_UNSIGNED_INT, NULL);
 }
 
 void ApplicationSolar::updateView() {
@@ -130,6 +137,9 @@ void ApplicationSolar::initializeShaderPrograms() {
 	m_shaders.at("planet").u_locs["ModelMatrix"] = -1;
 	m_shaders.at("planet").u_locs["ViewMatrix"] = -1;
 	m_shaders.at("planet").u_locs["ProjectionMatrix"] = -1;
+
+	m_shaders.emplace("star", shader_program{ m_resource_path + "shaders/star.vert",
+		m_resource_path + "shaders/star.frag" });
 }
 
 // load models
