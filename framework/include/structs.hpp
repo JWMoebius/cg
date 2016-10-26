@@ -7,6 +7,8 @@
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <vector>
+#include <memory>
+#include <iostream>
 
 // use gl definitions from glbinding
 using namespace gl;
@@ -16,6 +18,7 @@ struct moon {
   float rotation_velocity;
   glm::fvec3 distance_to_planet;
   glm::fmat4 parent_model_matrix;
+  ~moon() { std::cout << "moon was destroyed"; }
 };
 
 //planet representation
@@ -23,7 +26,7 @@ struct planet {
   float size;
   float rotation_velocity;
   glm::fvec3 distance_to_origin;
-  std::vector<moon> moons;
+  std::vector<std::shared_ptr<moon>> moons;
 };
 
 // gpu representation of model
