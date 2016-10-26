@@ -21,7 +21,9 @@ using namespace gl;
 #include <glm/gtx/rotate_vector.hpp>
 
 #include <iostream>
-
+#include <cstdlib>
+#include <ctime>
+#include <cmath>
 
 
 
@@ -57,6 +59,16 @@ void ApplicationSolar::create_scene() {
 	planet_vector.push_back(Jupiter);
 	planet_vector.push_back(Saturn);
 	planet_vector.push_back(Uranus);
+
+	std::srand(std::time(0));
+	float star_x, star_y, star_z;
+	for(int i=0; i < 10000; ++i) {
+		star_x = std::rand() % 1000;
+		star_y = std::rand() % 1000;
+		star_z = std::rand() % 1000;
+		star_vector.push_back({star_x, star_y, star_z, std::sin(star_x), std::sin(star_y), std::sin(star_z)});
+		star_ind_vec.push_back(i);
+	}
 }
 
 void ApplicationSolar::render() const {
