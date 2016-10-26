@@ -32,17 +32,18 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
 	planet Saturn{1.5f, 1.5f, glm::fvec3{ 20.0f, 0.0f, 20.0f }, {} };
 	planet Uranus{ 0.2f, 1.5f, glm::fvec3{ 30.5f, 0.0f, 30.5f }, {} };
 
-	moon Moon{ 0.05f, 1.5f, glm::fvec3{ 7.3, 0.0f, 5.3f } };
-	Saturn.moons.push_back(Moon);
+
+	moon Moon{ 0.07f, 1.5f, glm::fvec3{ 7.0f, 0.0f, 2.0f } };
+	Earth.moons.push_back(Moon);
 
 	planet_vector.push_back(Sun);
-	planet_vector.push_back(Mercury);
-	planet_vector.push_back(Venus);
+//	planet_vector.push_back(Mercury);
+//	planet_vector.push_back(Venus);
 	planet_vector.push_back(Earth);
-	planet_vector.push_back(Mars);
-	planet_vector.push_back(Jupiter);
-	planet_vector.push_back(Saturn);
-	planet_vector.push_back(Uranus);
+//	planet_vector.push_back(Mars);
+//	planet_vector.push_back(Jupiter);
+//	planet_vector.push_back(Saturn);
+//	planet_vector.push_back(Uranus);
 
 	initializeGeometry();
 	initializeShaderPrograms();
@@ -168,9 +169,15 @@ ApplicationSolar::~ApplicationSolar() {
 }
 
 glm::fmat4 ApplicationSolar::uploadPlanetTransforms(planet const& pl) const {
-	glm::fmat4 model_matrix = glm::rotate(glm::fmat4{}, float(glfwGetTime()) * pl.rotation_velocity, glm::fvec3{ 0.0f, 1.0f, 0.0f });
-	model_matrix *= glm::scale(glm::fmat4{}, glm::fvec3{pl.size}); // Scales the matrix depending on the size of the planet
-	model_matrix *= glm::translate(glm::fmat4{}, pl.distance_to_origin);
+	glm::fmat4 model_matrix = glm::rotate(glm::fmat4{}, float(glfwGetTime()) * pl.rotation_velocity, glm::fvec3{ 0.0f, 2.0f, 0.0f });
+	model_matrix = glm::scale(model_matrix, glm::fvec3{pl.size}); // Scales the matrix depending on the size of the planet
+	model_matrix = glm::translate(model_matrix, pl.distance_to_origin);
+
+	if (pl.moons.size() != 0) {
+		for (auto child_moon : pl.moons) {
+			child_moon.parent_model_matrix = model_matrix;
+		}
+	}
 
 	glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
 		1, GL_FALSE, glm::value_ptr(model_matrix));
@@ -186,17 +193,21 @@ glm::fmat4 ApplicationSolar::uploadPlanetTransforms(planet const& pl) const {
 
 void ApplicationSolar::uploadMoonTransforms(moon const& mo, glm::fmat4 const& pl_mat) const {
 	// Rotate moon around y-axis through its planet.
-	glm::fmat4 model_matrix = glm::rotate(glm::fmat4{}, float(glfwGetTime()) * mo.rotation_velocity,
-		glm::fvec3{pl_mat * glm::fvec4{0.0, 1.0, 0.0, 1.0}});
+	glm::fmat4 model_matrix = glm::rotate(mo.parent_model_matrix, float(glfwGetTime()) * mo.rotation_velocity,
+		glm::fvec3{glm::fvec4{0.0f, 1.0f, 0.0f, 1.0f}});
 
-	model_matrix *= glm::scale(glm::fmat4{}, glm::fvec3{mo.size});
-	model_matrix *= glm::translate(glm::fmat4{}, mo.distance_to_planet);
+	model_matrix = glm::scale(model_matrix, glm::fvec3{mo.size});
+	model_matrix = glm::translate(model_matrix, mo.distance_to_planet) ;
+
+	glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
+		1, GL_FALSE, glm::value_ptr(model_matrix));
 
 	// extra matrix for normal transformation to keep them orthogonal to surface
 	glm::fmat4 normal_matrix = glm::inverseTranspose(glm::inverse(m_view_transform) * model_matrix);
 
 	glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("NormalMatrix"),
 		1, GL_FALSE, glm::value_ptr(normal_matrix));
+
 }
 
 
