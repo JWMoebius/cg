@@ -17,9 +17,6 @@ using namespace gl;
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <glm/gtx/string_cast.hpp>
-#include <glm/gtx/rotate_vector.hpp>
-
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
@@ -60,6 +57,8 @@ void ApplicationSolar::create_scene() {
 	planet_vector.push_back(Saturn);
 	planet_vector.push_back(Uranus);
 
+
+	// initialise 10000 stars at pseudo-random positions inside ((0.0, 0.0, 0.0), (1000.0, 1000.0, 1000.0)).
 	std::srand(std::time(0));
 	float star_x, star_y, star_z;
 	for(int i=0; i < 10000; ++i) {
@@ -96,6 +95,7 @@ void ApplicationSolar::render() const {
 
 
 	//Stars:
+	//use star shader
 	glUseProgram(m_shaders.at("star").handle);
 
 	glBindVertexArray(star_object.vertex_AO);
