@@ -22,39 +22,41 @@ using namespace gl;
 
 #include <iostream>
 
+
+
+
 ApplicationSolar::ApplicationSolar(std::string const& resource_path)
 	:Application{ resource_path }
 	, planet_object{}, planet_vector{}
 {
-	planet Moon{ 0.7f, 8.0f, glm::fvec3{ 5.0f, 0.0f, 1.0f } };
-
-	planet Sun{ 0.5f, 5.5f, glm::fvec3{ 0.0, 0.0f, 0.0f } };
-	planet Mercury{ 0.1f, 1.5f, glm::fvec3{ 15.0f, 0.0f, 15.0f } };
-	planet Venus{ 0.1f, 1.5f, glm::fvec3{ 10.6f, 0.0f, 10.6f } };
-	planet Earth{ 0.07f, 1.5f, glm::fvec3{ 10.0f, 0.0f, 10.0f } };
-	planet Mars{ 0.5f, 1.5f, glm::fvec3{ 25.1f, 0.0f, 25.1f } };
-	planet Jupiter{ 0.1f, 1.5f, glm::fvec3{ 35.2f, 0.0f, 35.5f } };
-	planet Saturn{1.5f, 1.5f, glm::fvec3{ 20.0f, 0.0f, 20.0f } };
-	planet Uranus{ 0.2f, 1.5f, glm::fvec3{ 30.5f, 0.0f, 30.5f } };
-
-
-	// std::shared_ptr<moon> Moon =
-	// 	std::make_shared<moon>(moon{ 1.0f, 8.0f, glm::fvec3{ 1.0f, 0.0f, 1.0f }, glm::fmat4{} });
-	// Earth.moons.push_back(Moon);
-
-
-	planet_vector.push_back(Earth);
-	planet_vector.push_back(Moon);
-	// planet_vector.push_back(Sun);
-//	planet_vector.push_back(Mercury);
-//	planet_vector.push_back(Venus);
-//	planet_vector.push_back(Mars);
-//	planet_vector.push_back(Jupiter);
-//	planet_vector.push_back(Saturn);
-//	planet_vector.push_back(Uranus);
+	create_scene();
 
 	initializeGeometry();
 	initializeShaderPrograms();
+}
+
+void ApplicationSolar::create_scene() {
+	planet Moon{ 0.7f, 8.0f, glm::fvec3{ 5.0f, 0.0f, 1.0f } };
+
+	planet Sun{ 0.5f, 5.5f, glm::fvec3{ 0.0, 0.0f, 0.0f } };
+	planet Mercury{ 0.1f, 15.0f, glm::fvec3{ 15.0f, 0.0f, 15.0f } };
+	planet Venus{ 0.1f, 0.8f, glm::fvec3{ 10.6f, 0.0f, 10.6f } };
+	planet Earth{ 0.07f, 1.5f, glm::fvec3{ 10.0f, 0.0f, 10.0f } };
+	planet Mars{ 0.5f, 2.0f, glm::fvec3{ 25.1f, 0.0f, 25.1f } };
+	planet Jupiter{ 0.1f, 0.7f, glm::fvec3{ 35.2f, 0.0f, 35.5f } };
+	planet Saturn{1.5f, 3.0f, glm::fvec3{ 20.0f, 0.0f, 20.0f } };
+	planet Uranus{ 0.2f, 4.5f, glm::fvec3{ 22.0f, 0.1f, 23.45f } };
+	planet Neptun{ 0.6f, 0.3f, glm::fvec3{ 30.5f, 0.0f, 30.5f } };
+
+	planet_vector.push_back(Earth);
+	planet_vector.push_back(Moon);
+	planet_vector.push_back(Sun);
+	planet_vector.push_back(Mercury);
+	planet_vector.push_back(Venus);
+	planet_vector.push_back(Mars);
+	planet_vector.push_back(Jupiter);
+	planet_vector.push_back(Saturn);
+	planet_vector.push_back(Uranus);
 }
 
 void ApplicationSolar::render() const {
@@ -62,42 +64,11 @@ void ApplicationSolar::render() const {
 	glUseProgram(m_shaders.at("planet").handle);
 
 	glm::fmat4 earth_mat = uploadPlanetTransforms(planet_vector.front());
-	// bind the VAO to draw
 	glBindVertexArray(planet_object.vertex_AO);
-
-	// draw bound vertex array using bound shader
 	glDrawElements(planet_object.draw_mode, planet_object.num_elements, model::INDEX.type, NULL);
-
-
-
-
-
-
 
 	auto Moon = planet_vector.at(1);
-
-	glm::fmat4 moon_mat = glm::rotate(earth_mat, float(glfwGetTime()) * Moon.rotation_velocity, glm::fvec3{0.0f, 1.0f, 0.0f});
-	moon_mat = glm::scale(moon_mat, glm::fvec3{Moon.size});
-	moon_mat = glm::translate(moon_mat, Moon.distance_to_origin);
-
-	glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
-		1, GL_FALSE, glm::value_ptr(moon_mat));
-
-	// extra matrix for normal transformation to keep them orthogonal to surface
-	glm::fmat4 normal_matrix = glm::inverseTranspose(glm::inverse(m_view_transform) * moon_mat);
-
-	glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("NormalMatrix"),
-		1, GL_FALSE, glm::value_ptr(normal_matrix));
-
-	// bind the VAO to draw
-	glBindVertexArray(planet_object.vertex_AO);
-
-	// draw bound vertex array using bound shader
-	glDrawElements(planet_object.draw_mode, planet_object.num_elements, model::INDEX.type, NULL);
-
-
-
-
+	uploadMoonTransforms(Moon, earth_mat);
 
 	// Draw for all predefined planets in planet_vector depending on their attributes
 	glm::fmat4 planet_mat;
@@ -222,30 +193,28 @@ glm::fmat4 ApplicationSolar::uploadPlanetTransforms(planet const& pl) const {
 	return model_matrix;
 }
 
-// void ApplicationSolar::uploadMoonTransforms(moon const& mo, planet const& pl) const {
 
-//   glm::fvec3 y_axis = glm::fvec3{0.0f, 1.0f, 0.0f};
-//   float planet_rot = float(glfwGetTime()) * pl.rotation_velocity;
-//   float moon_rot = mo.rotation_velocity;
+void ApplicationSolar::uploadMoonTransforms(planet const& mo, glm::fmat4 const& parent_mat) const {
 
-//   glm::fmat4 model_matrix{};
-// 	model_matrix = glm::scale(glm::fvec3{mo.size});
-// 	model_matrix = glm::rotate(model_matrix, moon_rot, y_axis);
-// 	model_matrix = glm::translate(model_matrix, mo.distance_to_planet);
+	glm::fmat4 moon_mat = glm::rotate(parent_mat, float(glfwGetTime()) * mo.rotation_velocity, glm::fvec3{0.0f, 1.0f, 0.0f});
+	moon_mat = glm::scale(moon_mat, glm::fvec3{mo.size});
+	moon_mat = glm::translate(moon_mat, mo.distance_to_origin);
 
-// 	std::cout << "Parent mat: " << glm::to_string(mo.parent_model_matrix) << std::endl;
-// 	model_matrix *= mo.parent_model_matrix;
-// 	// std::cout << "After: " << glm::to_string(model_matrix) << std::endl;
+	glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
+		1, GL_FALSE, glm::value_ptr(moon_mat));
 
-// 	glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
-// 		1, GL_FALSE, glm::value_ptr(model_matrix));
+	// extra matrix for normal transformation to keep them orthogonal to surface
+	glm::fmat4 normal_matrix = glm::inverseTranspose(glm::inverse(m_view_transform) * moon_mat);
 
-// 	// extra matrix for normal transformation to keep them orthogonal to surface
-// 	glm::fmat4 normal_matrix = glm::inverseTranspose(glm::inverse(m_view_transform) * model_matrix);
+	glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("NormalMatrix"),
+		1, GL_FALSE, glm::value_ptr(normal_matrix));
 
-// 	glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("NormalMatrix"),
-// 		1, GL_FALSE, glm::value_ptr(normal_matrix));
-// }
+	// bind the VAO to draw
+	glBindVertexArray(planet_object.vertex_AO);
+
+	// draw bound vertex array using bound shader
+	glDrawElements(planet_object.draw_mode, planet_object.num_elements, model::INDEX.type, NULL);
+}
 
 
 // exe entry point

@@ -13,6 +13,8 @@ class ApplicationSolar : public Application {
   // free allocated objects
   ~ApplicationSolar();
 
+  void create_scene();
+
   // update uniform locations and values
   void uploadUniforms();
   // update projection matrix
@@ -27,7 +29,7 @@ class ApplicationSolar : public Application {
   void initializeGeometry();
   void updateView();
   glm::fmat4 uploadPlanetTransforms(planet const&) const;
-  // void uploadMoonTransforms(moon const&, planet const&) const;
+  void uploadMoonTransforms(planet const&, glm::fmat4 const&) const;
 
   // cpu representation of model
   std::vector<planet> planet_vector;
