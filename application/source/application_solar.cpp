@@ -68,7 +68,7 @@ void ApplicationSolar::render() const {
 	// Draw all predefined moons depending on their attributes
 	for (auto planet : planet_vector) {
 		for (auto moon : planet.moons) {
-			uploadMoonTransforms(moon, planet_mat);
+			uploadMoonTransforms(moon);
 			glBindVertexArray(planet_object.vertex_AO);
 			glDrawElements(planet_object.draw_mode, planet_object.num_elements, model::INDEX.type, NULL);
 		}
@@ -191,7 +191,7 @@ glm::fmat4 ApplicationSolar::uploadPlanetTransforms(planet const& pl) const {
 	return model_matrix;
 }
 
-void ApplicationSolar::uploadMoonTransforms(moon const& mo, glm::fmat4 const& pl_mat) const {
+void ApplicationSolar::uploadMoonTransforms(moon const& mo) const {
 	// Rotate moon around y-axis through its planet.
 	glm::fmat4 model_matrix = glm::rotate(mo.parent_model_matrix, float(glfwGetTime()) * mo.rotation_velocity,
 		glm::fvec3{glm::fvec4{0.0f, 1.0f, 0.0f, 1.0f}});
