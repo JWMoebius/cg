@@ -27,7 +27,7 @@ using namespace gl;
 
 ApplicationSolar::ApplicationSolar(std::string const& resource_path)
 	:Application{ resource_path }
-	, planet_object{}, planet_vector{}
+	, planet_object{}, planet_vector{}, star_object{}
 {
 	create_scene();
 
@@ -168,6 +168,26 @@ void ApplicationSolar::initializeGeometry() {
 	planet_object.draw_mode = GL_TRIANGLES;
 	// transfer number of indices to model object
 	planet_object.num_elements = GLsizei(planet_model.indices.size());
+
+	// Stars:
+	glGenVertexArrays(1, &star_object.vertex_AO);
+	glBindVertexArray(star_object.vertex_AO);
+
+	glGenBuffers(1, &star_object.vertex_BO);
+	glBindBuffer(GL_ARRAY_BUFFER, star_object.vertex_BO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(star) * star_vector.size(), star_vector.data(), GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float)*3, NULL);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float)*3, NULL);
+
+	glGenBuffers(1, &star_object.element_BO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, star_object.element_BO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned) * star_ind_vec.size(), star_ind_vec.data(), GL_STATIC_DRAW);
+
+	star_object.draw_mode = GL_POINTS;
+	star_object.num_elements = GLsizei(star_ind_vec.size());
 }
 
 ApplicationSolar::~ApplicationSolar() {

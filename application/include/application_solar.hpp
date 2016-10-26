@@ -34,6 +34,9 @@ class ApplicationSolar : public Application {
   // cpu representation of model
   std::vector<planet> planet_vector;
   model_object planet_object;
+  std::vector<star> star_vector;
+  model_object star_object;
+  std::vector<unsigned> star_ind_vec;
 };
 
 #endif

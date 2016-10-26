@@ -21,6 +21,17 @@ struct planet {
   glm::fvec3 distance_to_origin;
 };
 
+//star representation
+struct star {
+  float x;
+  float y;
+  float z;
+  float r;
+  float g;
+  float b;
+};
+
+
 // gpu representation of model
 struct model_object {
   // vertex array object
