@@ -11,7 +11,7 @@ out vec3 pass_color;
 
 void main(void)
 {
-  //Simply convert to homogeneous coordinates
+  // Convert position to homogeneous coordinates and apply projection and view.
   gl_Position = (ProjectionMatrix * ViewMatrix) * vec4(in_position, 1.0);
   gl_PointSize = 1.0; //Our stars are all the same size.
   pass_color = in_color;
