@@ -66,13 +66,13 @@ void ApplicationSolar::create_scene() {
 	auto random_num_lambda = []() {return static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);};
 	const float star_range = 100.0f;
 	for(int i=0; i < 10000; ++i) {
-		x = star_range * random_num_lambda() - (star_range/2);
-		y = star_range * random_num_lambda() - (star_range/2);
-		z = star_range * random_num_lambda() - (star_range/2);
-		r = random_num_lambda();
-		g = random_num_lambda();
-		b = random_num_lambda();
-		star_vector.push_back({x, y, z, std::abs(std::sin(r)), std::abs(std::sin(g)), std::abs(std::sin(b))});
+		x = star_range * random_num_lambda() - star_range;
+		y = star_range * random_num_lambda() - star_range;
+		z = star_range * random_num_lambda() - star_range;
+		r = std::abs(std::sin(x));
+		g = std::abs(std::sin(x+y));
+		b = std::abs(std::sin(x+y+z));
+		star_vector.push_back({x, y, z, r, g, b});
 		star_ind_vec.push_back(i);
 	}
 }
