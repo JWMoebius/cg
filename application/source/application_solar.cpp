@@ -58,14 +58,15 @@ void ApplicationSolar::create_scene() {
 	planet_vector.push_back(Uranus);
 
 
-	// initialise 10000 stars at pseudo-random positions inside ((0.0, 0.0, 0.0), (1000.0, 1000.0, 1000.0)).
-	std::srand(std::time(0));
+	// initialise 10000 stars at pseudo-random positions inside x,y,z in (-100.0f, +100.0f).
+	// star colors depend on their position
+	std::srand(std::time(nullptr));
 	float star_x, star_y, star_z;
 	for(int i=0; i < 10000; ++i) {
-		star_x = std::rand() % 1000;
-		star_y = std::rand() % 1000;
-		star_z = std::rand() % 1000;
-		star_vector.push_back({star_x, star_y, star_z, std::sin(star_x), std::sin(star_y), std::sin(star_z)});
+		star_x = 200 * (std::rand() / (RAND_MAX + 1.0f)) - 100;
+		star_y = 200 * (std::rand() / (RAND_MAX + 1.0f)) - 100;
+		star_z = 200 * (std::rand() / (RAND_MAX + 1.0f)) - 100;
+		star_vector.push_back({star_x, star_y, star_z, std::abs(std::sin(star_x)), std::abs(std::cos(star_y)), std::abs(std::tan(star_z))});
 		star_ind_vec.push_back(i);
 	}
 }
@@ -93,7 +94,6 @@ void ApplicationSolar::render() const {
 		glDrawElements(planet_object.draw_mode, planet_object.num_elements, model::INDEX.type, NULL);
 	}
 
-
 	//Stars:
 	//use star shader
 	glUseProgram(m_shaders.at("star").handle);
@@ -105,14 +105,30 @@ void ApplicationSolar::render() const {
 void ApplicationSolar::updateView() {
 	// vertices are transformed in camera space, so camera transform must be inverted
 	glm::fmat4 view_matrix = glm::inverse(m_view_transform);
+
 	// upload matrix to gpu
 	glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ViewMatrix"),
+		1, GL_FALSE, glm::value_ptr(view_matrix));
+
+	glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ViewMatrix"),
+		1, GL_FALSE, glm::value_ptr(view_matrix));
+
+	glUseProgram(m_shaders.at("star").handle);
+	glUniformMatrix4fv(m_shaders.at("star").u_locs.at("ViewMatrix"),
+		1, GL_FALSE, glm::value_ptr(view_matrix));
+
+	glUniformMatrix4fv(m_shaders.at("star").u_locs.at("ViewMatrix"),
 		1, GL_FALSE, glm::value_ptr(view_matrix));
 }
 
 void ApplicationSolar::updateProjection() {
 	// upload matrix to gpu
+	glUseProgram(m_shaders.at("planet").handle);
 	glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ProjectionMatrix"),
+		1, GL_FALSE, glm::value_ptr(m_view_projection));
+
+	glUseProgram(m_shaders.at("star").handle);
+	glUniformMatrix4fv(m_shaders.at("star").u_locs.at("ProjectionMatrix"),
 		1, GL_FALSE, glm::value_ptr(m_view_projection));
 }
 
@@ -120,9 +136,7 @@ void ApplicationSolar::updateProjection() {
 void ApplicationSolar::uploadUniforms() {
 	updateUniformLocations();
 
-	// bind new shader
 	glUseProgram(m_shaders.at("planet").handle);
-
 	updateView();
 	updateProjection();
 }
@@ -150,8 +164,11 @@ void ApplicationSolar::initializeShaderPrograms() {
 	m_shaders.at("planet").u_locs["ViewMatrix"] = -1;
 	m_shaders.at("planet").u_locs["ProjectionMatrix"] = -1;
 
+	// stars don't need model- or normal matrices
 	m_shaders.emplace("star", shader_program{ m_resource_path + "shaders/star.vert",
 		m_resource_path + "shaders/star.frag" });
+	m_shaders.at("star").u_locs["ViewMatrix"] = -1;
+	m_shaders.at("star").u_locs["ProjectionMatrix"] = -1;
 }
 
 // load models
