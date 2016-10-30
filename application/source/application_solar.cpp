@@ -154,8 +154,39 @@ void ApplicationSolar::keyCallback(int key, int scancode, int action, int mods) 
 		m_view_transform = glm::translate(m_view_transform, glm::fvec3{ 0.0f, 0.0f, 0.1f });
 		updateView();
 	}
+	else if (key == GLFW_KEY_A && action == GLFW_PRESS) {
+		m_view_transform = glm::translate(m_view_transform, glm::fvec3{ -0.1f, 0.0f, 0.0f });
+		updateView();
+	}
+	else if (key == GLFW_KEY_D && action == GLFW_PRESS) {
+		m_view_transform = glm::translate(m_view_transform, glm::fvec3{ 0.1f, 0.0f, 0.0f });
+		updateView();
+
+	}
 }
 
+//handle delta mouse movement input
+void ApplicationSolar::mouseCallback(double pos_x, double pos_y) {
+	// mouse handling
+	if (pos_x >= 1) {
+		m_view_transform = glm::rotate(m_view_transform, -0.01f, glm::fvec3{ 0.0f, 0.1f, 0.0f });
+		updateView();
+
+	}
+	else if (pos_x <= 1) {
+		m_view_transform = glm::rotate(m_view_transform, 0.01f, glm::fvec3{ 0.0f, 0.1f, 0.0f });
+		updateView();
+
+	}
+	if (pos_y >= 1) {
+		m_view_transform = glm::rotate(m_view_transform, -0.01f, glm::fvec3{ 0.1f, 0.0f, 0.0f });
+		updateView();
+	}
+	else if (pos_y <= 1) {
+		m_view_transform = glm::rotate(m_view_transform, 0.01f, glm::fvec3{ 0.1f, 0.0f, 0.0f });
+		updateView();
+	}
+}
 // load shader programs
 void ApplicationSolar::initializeShaderPrograms() {
 	// store shader program objects in container
