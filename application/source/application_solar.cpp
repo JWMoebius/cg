@@ -82,6 +82,7 @@ void ApplicationSolar::render() const {
 	// bind shader to upload uniforms
 	glUseProgram(m_shaders.at("planet").handle);
 
+	// earth and moon get a special treatment for the moment
 	glm::fmat4 earth_mat = uploadPlanetTransforms(planet_vector.front());
 	glBindVertexArray(planet_object.vertex_AO);
 	glDrawElements(planet_object.draw_mode, planet_object.num_elements, model::INDEX.type, NULL);
@@ -147,47 +148,35 @@ void ApplicationSolar::uploadUniforms() {
 
 // handle key input
 void ApplicationSolar::keyCallback(int key, int scancode, int action, int mods) {
-	if (key == GLFW_KEY_W && action != GLFW_KEY_UP) {
+	if (key == GLFW_KEY_W) {
 		m_view_transform = glm::translate(m_view_transform, glm::fvec3{ 0.0f, 0.0f, -0.1f });
 		updateView();
 	}
-	else if (key == GLFW_KEY_S && action != GLFW_KEY_UP) {
+	else if (key == GLFW_KEY_S) {
 		m_view_transform = glm::translate(m_view_transform, glm::fvec3{ 0.0f, 0.0f, 0.1f });
 		updateView();
 	}
-	else if (key == GLFW_KEY_A && action != GLFW_KEY_UP) {
+	else if (key == GLFW_KEY_A) {
 		m_view_transform = glm::translate(m_view_transform, glm::fvec3{ -0.1f, 0.0f, 0.0f });
 		updateView();
 	}
-	else if (key == GLFW_KEY_D && action != GLFW_KEY_UP) {
+	else if (key == GLFW_KEY_D) {
 		m_view_transform = glm::translate(m_view_transform, glm::fvec3{ 0.1f, 0.0f, 0.0f });
 		updateView();
-
 	}
 }
 
 //handle delta mouse movement input
 void ApplicationSolar::mouseCallback(double pos_x, double pos_y) {
 	// mouse handling
-	if (pos_x >= 1) {
-		m_view_transform = glm::rotate(m_view_transform, -0.01f, glm::fvec3{ 0.0f, 0.1f, 0.0f });
-		updateView();
 
-	}
-	else if (pos_x <= 1) {
-		m_view_transform = glm::rotate(m_view_transform, 0.01f, glm::fvec3{ 0.0f, 0.1f, 0.0f });
-		updateView();
-
-	}
-	if (pos_y >= 1) {
-		m_view_transform = glm::rotate(m_view_transform, -0.01f, glm::fvec3{ 0.1f, 0.0f, 0.0f });
-		updateView();
-	}
-	else if (pos_y <= 1) {
-		m_view_transform = glm::rotate(m_view_transform, 0.01f, glm::fvec3{ 0.1f, 0.0f, 0.0f });
-		updateView();
-	}
+	float x_mov = 0.001f * static_cast<float>(pos_x);
+	float y_mov = 0.001f * static_cast<float>(pos_y);
+	m_view_transform = glm::rotate(m_view_transform, x_mov, glm::fvec3{ 0.0f, -1.0f, 0.0f });
+	m_view_transform = glm::rotate(m_view_transform, y_mov, glm::fvec3{ -1.0f, 0.0f, 0.0f });
+	updateView();
 }
+
 // load shader programs
 void ApplicationSolar::initializeShaderPrograms() {
 	// store shader program objects in container
