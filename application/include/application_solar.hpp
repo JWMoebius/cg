@@ -38,7 +38,6 @@ class ApplicationSolar : public Application {
   model_object planet_object;
   std::vector<star> star_vector;
   model_object star_object; //gpu representation of star
-  std::vector<unsigned> star_ind_vec; //indexing vector used for indexing not-yet-index stars vector that needs indexing
 };
 
 #endif

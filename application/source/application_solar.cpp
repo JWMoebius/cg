@@ -43,7 +43,7 @@ void ApplicationSolar::create_scene() {
 	planet Earth{ 0.07f, 1.5f, glm::fvec3{ 10.0f, 0.0f, 10.0f } };
 	planet Mars{ 0.5f, 2.0f, glm::fvec3{ 25.1f, 0.0f, 25.1f } };
 	planet Jupiter{ 0.1f, 0.7f, glm::fvec3{ 35.2f, 0.0f, 35.5f } };
-	planet Saturn{1.5f, 3.0f, glm::fvec3{ 20.0f, 0.0f, 20.0f } };
+	planet Saturn{ 1.5f, 3.0f, glm::fvec3{ 20.0f, 0.0f, 20.0f } };
 	planet Uranus{ 0.2f, 4.5f, glm::fvec3{ 22.0f, 0.1f, 23.45f } };
 	planet Neptun{ 0.6f, 0.3f, glm::fvec3{ 30.5f, 0.0f, 30.5f } };
 
@@ -58,22 +58,23 @@ void ApplicationSolar::create_scene() {
 	planet_vector.push_back(Uranus);
 
 
-	// initialise 10000 stars at pseudo-random positions inside x,y,z in (-100.0f, +100.0f).
+	// initialise 10000 stars at pseudo-random positions.
 	// star colors depend on their position
-	std::srand(std::time(nullptr));
-	float x, y, z, r, g, b;
 	// lambda returns random value between 0.0f and 1.0f
+
+	float x, y, z, r, g, b;
+	std::srand(std::time(nullptr));
 	auto random_num_lambda = []() {return static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);};
-	const float star_range = 100.0f;
+	const float star_range = 100000.0f;
 	for(int i=0; i < 10000; ++i) {
 		x = star_range * random_num_lambda() - star_range;
 		y = star_range * random_num_lambda() - star_range;
 		z = star_range * random_num_lambda() - star_range;
 		r = std::abs(std::sin(x));
-		g = std::abs(std::sin(x+y));
+		g = std::abs(std::cos(x+y));
 		b = std::abs(std::sin(x+y+z));
 		star_vector.push_back({x, y, z, r, g, b});
-		star_ind_vec.push_back(i);
+		// star_ind_vec.push_back(i);
 	}
 }
 
@@ -105,7 +106,7 @@ void ApplicationSolar::render() const {
 	glUseProgram(m_shaders.at("star").handle);
 
 	glBindVertexArray(star_object.vertex_AO);
-	glDrawElements(star_object.draw_mode, star_vector.size(), GL_UNSIGNED_INT, NULL);
+	glDrawArrays(star_object.draw_mode, 0, star_vector.size());
 }
 
 void ApplicationSolar::updateView() {
@@ -255,12 +256,7 @@ void ApplicationSolar::initializeGeometry() {
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float)*3, NULL);
 
-	glGenBuffers(1, &star_object.element_BO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, star_object.element_BO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned) * star_ind_vec.size(), star_ind_vec.data(), GL_STATIC_DRAW);
-
 	star_object.draw_mode = GL_POINTS;
-	star_object.num_elements = GLsizei(star_ind_vec.size());
 }
 
 ApplicationSolar::~ApplicationSolar() {
