@@ -8,12 +8,13 @@ in vec3 col_planet; // planet color
 out vec4 out_Color;
 
 vec3 col_sun = vec3(1.0, 1.0, 0.0);
-// vec3 col_planet = vec3(0.0, 0.5, 1.0);
 
 void main() {
+  vec3 light_amb = col_sun * col_planet * 0.2;
+
   // we need to clamp negative values to avoid lighting the backside
   float lambert = max(dot(normalize(incidence_ray), normalize(pass_Normal)), 0.0);
   vec3 light_dif = col_sun * col_planet * vec3(lambert);
 
-  out_Color = vec4(abs(normalize(light_dif)), 1.0);
+  out_Color = vec4((light_amb + light_dif), 1.0);
 }
