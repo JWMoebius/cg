@@ -115,7 +115,7 @@ void ApplicationSolar::updateView() {
 	glUseProgram(m_shaders.at("planet").handle);
 	glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ViewMatrix"),
 		1, GL_FALSE, glm::value_ptr(view_matrix));
-	glUniform3f(m_shaders.at("planet").u_locs.at("SunViewMatrix"), sun_pos.x, sun_pos.y, sun_pos.z);
+	glUniform3f(m_shaders.at("planet").u_locs.at("SunViewPos"), sun_pos.x, sun_pos.y, sun_pos.z);
 
 	glUseProgram(m_shaders.at("star").handle);
 	glUniformMatrix4fv(m_shaders.at("star").u_locs.at("ViewMatrix"),
@@ -182,7 +182,7 @@ void ApplicationSolar::initializeShaderPrograms() {
 	m_shaders.at("planet").u_locs["ModelMatrix"] = -1;
 	m_shaders.at("planet").u_locs["ViewMatrix"] = -1;
 	m_shaders.at("planet").u_locs["ProjectionMatrix"] = -1;
-	m_shaders.at("planet").u_locs["SunViewMatrix"] = -1;
+	m_shaders.at("planet").u_locs["SunViewPos"] = -1;
 
 
 	// star uniforms:
