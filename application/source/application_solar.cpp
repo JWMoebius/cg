@@ -38,17 +38,17 @@ float random_number(float min, float max) {
 }
 
 void ApplicationSolar::create_scene() {
-	planet Moon{ 0.7f, 8.0f, glm::fvec3{ 5.0f, 0.0f, 1.0f } };
+	planet Moon{ 0.7f, 8.0f, glm::fvec3{ 5.0f, 0.0f, 1.0f }, glm::fvec3{ 0.7f, 0.7f, 0.7f } };
 
-	planet Sun{ 0.5f, 5.5f, glm::fvec3{ 0.0, 0.0f, 0.0f } };
-	planet Mercury{ 0.1f, 15.0f, glm::fvec3{ 15.0f, 0.0f, 15.0f } };
-	planet Venus{ 0.1f, 0.8f, glm::fvec3{ 10.6f, 0.0f, 10.6f } };
-	planet Earth{ 0.07f, 1.5f, glm::fvec3{ 10.0f, 0.0f, 10.0f } };
-	planet Mars{ 0.5f, 2.0f, glm::fvec3{ 25.1f, 0.0f, 25.1f } };
-	planet Jupiter{ 0.1f, 0.7f, glm::fvec3{ 35.2f, 0.0f, 35.5f } };
-	planet Saturn{ 1.5f, 3.0f, glm::fvec3{ 20.0f, 0.0f, 20.0f } };
-	planet Uranus{ 0.2f, 4.5f, glm::fvec3{ 22.0f, 0.1f, 23.45f } };
-	planet Neptun{ 0.6f, 0.3f, glm::fvec3{ 30.5f, 0.0f, 30.5f } };
+	planet Sun{ 0.5f, 5.5f, glm::fvec3{ 0.0, 0.0f, 0.0f }, glm::fvec3{ 1.0f, 1.0f, 1.0f } };
+	planet Mercury{ 0.1f, 15.0f, glm::fvec3{ 15.0f, 0.0f, 15.0f }, glm::fvec3{ 0.8f, 0.8f, 0.1f } };
+	planet Venus{ 0.1f, 0.8f, glm::fvec3{ 10.6f, 0.0f, 10.6f }, glm::fvec3{ 0.8f, 0.1f, 0.2f } };
+	planet Earth{ 0.07f, 1.5f, glm::fvec3{ 10.0f, 0.0f, 10.0f }, glm::fvec3{ 0.0f, 0.2f, 0.9f } };
+	planet Mars{ 0.5f, 2.0f, glm::fvec3{ 25.1f, 0.0f, 25.1f }, glm::fvec3{ 0.7f, 0.0f, 0.0f } };
+	planet Jupiter{ 0.1f, 0.7f, glm::fvec3{ 35.2f, 0.0f, 35.5f }, glm::fvec3{ 0.3f, 0.3f, 0.3f } };
+	planet Saturn{ 1.5f, 3.0f, glm::fvec3{ 20.0f, 0.0f, 20.0f }, glm::fvec3{ 0.5f, 0.5f, 0.2f } };
+	planet Uranus{ 0.2f, 4.5f, glm::fvec3{ 22.0f, 0.1f, 23.45f }, glm::fvec3{ 0.0f, 0.4f, 1.0f } };
+	planet Neptun{ 0.6f, 0.3f, glm::fvec3{ 30.5f, 0.0f, 30.5f }, glm::fvec3{ 0.0f, 0.0f, 1.0f } };
 
 	planet_vector.push_back(Earth);
 	planet_vector.push_back(Moon);
@@ -182,6 +182,7 @@ void ApplicationSolar::initializeShaderPrograms() {
 	m_shaders.at("planet").u_locs["ModelMatrix"] = -1;
 	m_shaders.at("planet").u_locs["ViewMatrix"] = -1;
 	m_shaders.at("planet").u_locs["ProjectionMatrix"] = -1;
+	m_shaders.at("planet").u_locs["Color"] = -1;
 	m_shaders.at("planet").u_locs["SunViewPos"] = -1;
 
 
@@ -265,6 +266,8 @@ glm::fmat4 ApplicationSolar::uploadPlanetTransforms(planet const& pl) const {
 
 	glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("NormalMatrix"),
 		1, GL_FALSE, glm::value_ptr(normal_matrix));
+
+	glUniform3f(m_shaders.at("planet").u_locs.at("Color"), pl.color.x, pl.color.y, pl.color.z);
 
 	// bind the VAO to draw
 	glBindVertexArray(planet_object.vertex_AO);
