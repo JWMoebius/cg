@@ -22,8 +22,6 @@ using namespace gl;
 #include <ctime>
 #include <cmath>
 
-
-
 ApplicationSolar::ApplicationSolar(std::string const& resource_path)
 	:Application{ resource_path }
 	, planet_object{}, planet_vector{}, star_object{}
@@ -32,6 +30,11 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
 
 	initializeGeometry();
 	initializeShaderPrograms();
+}
+
+float random_number(float min, float max) {
+	float rand_num = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+	return (max-min) * rand_num;
 }
 
 void ApplicationSolar::create_scene() {
@@ -64,17 +67,17 @@ void ApplicationSolar::create_scene() {
 
 	float x, y, z, r, g, b;
 	std::srand(std::time(nullptr));
-	auto random_num_lambda = []() {return static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);};
-	const float star_range = 100000.0f;
+	// auto random_num_lambda = []() {return static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);};
+	const float star_range = 100.0f;
 	for(int i=0; i < 10000; ++i) {
-		x = star_range * random_num_lambda() - star_range;
-		y = star_range * random_num_lambda() - star_range;
-		z = star_range * random_num_lambda() - star_range;
+		x = random_number(-star_range, star_range);
+		y = random_number(-star_range, star_range);
+		z = random_number(-star_range, star_range);
+
 		r = std::abs(std::sin(x));
-		g = std::abs(std::cos(x+y));
-		b = std::abs(std::sin(x+y+z));
+		g = std::abs(std::cos(y));
+		b = std::abs(std::sin(z));
 		star_vector.push_back({x, y, z, r, g, b});
-		// star_ind_vec.push_back(i);
 	}
 }
 
@@ -105,6 +108,9 @@ void ApplicationSolar::render() const {
 	//Stars:
 	//use star shader
 	glUseProgram(m_shaders.at("star").handle);
+	glm::fmat4 star_model_matrix = glm::scale(glm::fmat4{}, glm::fvec3{15.0});
+	star_model_matrix = glm::translate(star_model_matrix, glm::fvec3{-0.5, -0.5, -0.5});
+	glUniformMatrix4fv(m_shaders.at("star").u_locs.at("ModelMatrix"), 1, GL_FALSE, glm::value_ptr(star_model_matrix));
 
 	glBindVertexArray(star_object.vertex_AO);
 	glDrawArrays(star_object.draw_mode, 0, star_vector.size());
@@ -119,10 +125,10 @@ void ApplicationSolar::updateView() {
 	glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ViewMatrix"),
 		1, GL_FALSE, glm::value_ptr(view_matrix));
 
-
 	glUseProgram(m_shaders.at("star").handle);
 	glUniformMatrix4fv(m_shaders.at("star").u_locs.at("ViewMatrix"),
 		1, GL_FALSE, glm::value_ptr(view_matrix));
+
 	glUseProgram(m_shaders.at("planet").handle);
 }
 
@@ -151,16 +157,13 @@ void ApplicationSolar::keyCallback(int key, int scancode, int action, int mods) 
 	if (key == GLFW_KEY_W) {
 		m_view_transform = glm::translate(m_view_transform, glm::fvec3{ 0.0f, 0.0f, -0.1f });
 		updateView();
-	}
-	else if (key == GLFW_KEY_S) {
+	}	else if (key == GLFW_KEY_S) {
 		m_view_transform = glm::translate(m_view_transform, glm::fvec3{ 0.0f, 0.0f, 0.1f });
 		updateView();
-	}
-	else if (key == GLFW_KEY_A) {
+	}	else if (key == GLFW_KEY_A) {
 		m_view_transform = glm::translate(m_view_transform, glm::fvec3{ -0.1f, 0.0f, 0.0f });
 		updateView();
-	}
-	else if (key == GLFW_KEY_D) {
+	}	else if (key == GLFW_KEY_D) {
 		m_view_transform = glm::translate(m_view_transform, glm::fvec3{ 0.1f, 0.0f, 0.0f });
 		updateView();
 	}
@@ -191,6 +194,7 @@ void ApplicationSolar::initializeShaderPrograms() {
 	// stars only need a view matrix
 	m_shaders.emplace("star", shader_program{ m_resource_path + "shaders/star.vert",
 		m_resource_path + "shaders/star.frag" });
+	m_shaders.at("star").u_locs["ModelMatrix"] = -1;
 	m_shaders.at("star").u_locs["ViewMatrix"] = -1;
 	m_shaders.at("star").u_locs["ProjectionMatrix"] = -1;
 }
