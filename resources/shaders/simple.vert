@@ -23,6 +23,7 @@ void main(void)
 	gl_Position = (ProjectionMatrix  * ViewMatrix * ModelMatrix) * vec4(in_Position, 1.0);
 	pass_Normal = (NormalMatrix * vec4(in_Normal, 0.0)).xyz;
   frag_pos = ViewMatrix * ModelMatrix * vec4(in_Position, 1.0);
+  // incidence vector from light source to fragment position:
   incidence_ray = SunViewPos - vec3(frag_pos);
   col_planet = Color;
 }
