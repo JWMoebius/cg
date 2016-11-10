@@ -60,19 +60,20 @@ void ApplicationSolar::create_scene() {
 	planet_vector.push_back(Saturn);
 	planet_vector.push_back(Uranus);
 
-
-	// initialise 10000 stars at pseudo-random positions.
+	// initialise 100000 stars at pseudo-random positions.
 	// star colors depend on their position
-	// lambda returns random value between 0.0f and 1.0f
 
 	float x, y, z, r, g, b;
 	std::srand(std::time(nullptr));
 	const float star_range = 100.0f;
 
-	for(int i=0; i < 10000; ++i) {
-		x = random_number(-star_range, star_range);
-		y = random_number(-star_range, star_range);
-		z = random_number(-star_range, star_range);
+	for(int i=0; i < 100000; ++i) {
+		// this should work theoretically but doesn't.
+		do {
+			x = random_number(-star_range, star_range);
+			y = random_number(-star_range, star_range);
+			z = random_number(-star_range, star_range);
+		} while (x*x + y*y + z*z > star_range*star_range); // toss out point if it's not in the sphere
 
 		r = std::abs(std::sin(x));
 		g = std::abs(std::cos(y));
@@ -98,7 +99,7 @@ void ApplicationSolar::render() const {
 	//Stars:
 	//use star shader
 	glUseProgram(m_shaders.at("star").handle);
-	glm::fmat4 star_mat = glm::scale(glm::fmat4{}, glm::fvec3{15.0});
+	glm::fmat4 star_mat = glm::scale(glm::fmat4{}, glm::fvec3{100.0}); // spread out the stars
 	star_mat = glm::translate(star_mat, glm::fvec3{-0.5, -0.5, -0.5});
 	glUniformMatrix4fv(m_shaders.at("star").u_locs.at("ModelMatrix"), 1, GL_FALSE, glm::value_ptr(star_mat));
 

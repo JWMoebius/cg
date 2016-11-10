@@ -10,6 +10,8 @@ out vec4 out_Color;
 vec3 col_sun = vec3(1.0, 1.0, 0.0);
 
 void main() {
+  //Blinn-Phong reflection model:
+
   // ambient:
   // arbitrary factor for good looks
   vec3 light_amb = col_sun * col_planet;
