@@ -67,8 +67,8 @@ void ApplicationSolar::create_scene() {
 
 	float x, y, z, r, g, b;
 	std::srand(std::time(nullptr));
-	// auto random_num_lambda = []() {return static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);};
 	const float star_range = 100.0f;
+
 	for(int i=0; i < 10000; ++i) {
 		x = random_number(-star_range, star_range);
 		y = random_number(-star_range, star_range);
@@ -109,11 +109,13 @@ void ApplicationSolar::render() const {
 void ApplicationSolar::updateView() {
 	// vertices are transformed in camera space, so camera transform must be inverted
 	glm::fmat4 view_matrix = glm::inverse(m_view_transform);
+	glm::fvec3 sun_pos = glm::fvec3(view_matrix * glm::fvec4{0.0, 0.0, 0.0, 1.0});
 
 	// upload matrix to gpu
 	glUseProgram(m_shaders.at("planet").handle);
 	glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ViewMatrix"),
 		1, GL_FALSE, glm::value_ptr(view_matrix));
+	glUniform3f(m_shaders.at("planet").u_locs.at("SunViewMatrix"), sun_pos.x, sun_pos.y, sun_pos.z);
 
 	glUseProgram(m_shaders.at("star").handle);
 	glUniformMatrix4fv(m_shaders.at("star").u_locs.at("ViewMatrix"),
@@ -180,13 +182,15 @@ void ApplicationSolar::initializeShaderPrograms() {
 	m_shaders.at("planet").u_locs["ModelMatrix"] = -1;
 	m_shaders.at("planet").u_locs["ViewMatrix"] = -1;
 	m_shaders.at("planet").u_locs["ProjectionMatrix"] = -1;
+	m_shaders.at("planet").u_locs["SunViewMatrix"] = -1;
 
-	// stars only need a view matrix
+
+	// star uniforms:
 	m_shaders.emplace("star", shader_program{ m_resource_path + "shaders/star.vert",
 		m_resource_path + "shaders/star.frag" });
-	m_shaders.at("star").u_locs["ModelMatrix"] = -1;
 	m_shaders.at("star").u_locs["ViewMatrix"] = -1;
 	m_shaders.at("star").u_locs["ProjectionMatrix"] = -1;
+	m_shaders.at("star").u_locs["ModelMatrix"] = -1;
 }
 
 // load models
