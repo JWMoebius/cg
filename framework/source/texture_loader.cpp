@@ -10,14 +10,16 @@
 // create implementation here
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
- 
-#include <cstdint> 
-#include <cstring> 
-#include <stdexcept> 
+
+#include <cstdint>
+#include <cstring>
+#include <stdexcept>
 
 namespace texture_loader {
 pixel_data file(std::string const& file_name) {
   uint8_t* data_ptr;
+  // match to opengl representation
+  stbi_set_flip_vertically_on_load(true);
   int width = 0;
   int height = 0;
   int format = STBI_default;
