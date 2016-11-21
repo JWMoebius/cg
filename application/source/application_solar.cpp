@@ -48,7 +48,7 @@ void ApplicationSolar::create_scene() {
 	planet Jupiter{ 0.1f, 0.7f, glm::fvec3{ 35.2f, 0.0f, 35.5f }, glm::fvec3{ 0.3f, 0.3f, 0.3f } };
 	planet Saturn{ 1.5f, 3.0f, glm::fvec3{ 20.0f, 0.0f, 20.0f }, glm::fvec3{ 0.5f, 0.5f, 0.2f } };
 	planet Uranus{ 0.2f, 4.5f, glm::fvec3{ 22.0f, 0.1f, 23.45f }, glm::fvec3{ 0.0f, 0.4f, 1.0f } };
-	planet Neptun{ 0.6f, 0.3f, glm::fvec3{ 30.5f, 0.0f, 30.5f }, glm::fvec3{ 0.0f, 0.0f, 1.0f } };
+	planet Neptune{ 0.6f, 0.3f, glm::fvec3{ 30.5f, 0.0f, 30.5f }, glm::fvec3{ 0.0f, 0.0f, 1.0f } };
 
 	planet_vector.push_back(Earth);
 	planet_vector.push_back(Moon);

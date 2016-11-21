@@ -4,3 +4,4 @@ install
 *.sublime-workspace
 *~
 .DS_Store
+resources/texture_originals
