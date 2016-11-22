@@ -71,7 +71,7 @@ void ApplicationSolar::create_scene() {
 	// star colors depend on their position
 
 	float x, y, z, r, g, b;
-	std::srand(std::time(nullptr));
+	std::srand(static_cast<unsigned>(std::time(nullptr)));
 	const float star_range = 100.0f;
 
 	for(int i=0; i < 100000; ++i) {
