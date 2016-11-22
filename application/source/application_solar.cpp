@@ -23,11 +23,6 @@ using namespace gl;
 #include <cmath>
 
 
-float random_number(float min, float max) {
-	float rand_num = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
-	return (max-min) * rand_num;
-}
-
 ApplicationSolar::ApplicationSolar(std::string const& resource_path)
 	:Application{ resource_path }
 	, planet_object{}, planet_vector{}, star_object{}
@@ -77,9 +72,9 @@ void ApplicationSolar::create_scene() {
 	for(int i=0; i < 100000; ++i) {
 		// this should work theoretically but doesn't.
 		do {
-			x = random_number(-star_range, star_range);
-			y = random_number(-star_range, star_range);
-			z = random_number(-star_range, star_range);
+			x = utils::random_number(-star_range, star_range);
+			y = utils::random_number(-star_range, star_range);
+			z = utils::random_number(-star_range, star_range);
 		} while (x*x + y*y + z*z > star_range*star_range); // toss out point if it's not in the sphere
 
 		r = std::abs(std::sin(x));

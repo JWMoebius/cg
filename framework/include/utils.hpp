@@ -2,7 +2,7 @@
 #define UTILS_HPP
 
 #include <glbinding/gl/types.h>
-// use gl definitions from glbinding 
+// use gl definitions from glbinding
 using namespace gl;
 
 struct pixel_data;
@@ -29,6 +29,8 @@ namespace utils {
   void output_log(GLchar const* log_buffer, std::string const& prefix);
   // read file and write content to string
   std::string read_file(std::string const& name);
+
+  float random_number(const float min, const float max);
 }
 
 #endif

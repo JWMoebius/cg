@@ -3,7 +3,7 @@
 #include "structs.hpp"
 
 #include <glbinding/gl/functions.h>
-// use gl definitions from glbinding 
+// use gl definitions from glbinding
 using namespace gl;
 
 #include <iostream>
@@ -114,9 +114,14 @@ std::string read_file(std::string const& name) {
   }
   else {
     std::cerr << "File \'" << name << "\' not found" << std::endl;
-    
+
     throw std::invalid_argument(name);
-  } 
+  }
+}
+
+float random_number(const float min, const float max) {
+  float rand_num = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+  return (max-min) * rand_num;
 }
 
 };
