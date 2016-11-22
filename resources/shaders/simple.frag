@@ -6,7 +6,7 @@ in vec3 incidence_ray; // incidence vector of the sun
 in vec3 col_planet; // planet color
 in vec2 texcoord; // planet texture coordinates
 
-uniform sampler2D TexturesNum;
+uniform sampler2D ColorTex;
 
 out vec4 out_Color;
 

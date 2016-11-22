@@ -33,6 +33,7 @@ class ApplicationSolar : public Application {
   void updateView();
   glm::fmat4 uploadPlanetTransforms(planet const&) const;
   void uploadMoonTransforms(planet const&, glm::fmat4 const&) const;
+  void uploadStarTransforms() const;
 
   // cpu representation of model
   std::vector<planet> planet_vector;

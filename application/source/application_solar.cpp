@@ -101,14 +101,8 @@ void ApplicationSolar::render() const {
 	}
 
 	//Stars:
-	//use star shader
-	glUseProgram(m_shaders.at("star").handle);
-	glm::fmat4 star_mat = glm::scale(glm::fmat4{}, glm::fvec3{100.0}); // spread out the stars
-	star_mat = glm::translate(star_mat, glm::fvec3{-0.5, -0.5, -0.5});
-	glUniformMatrix4fv(m_shaders.at("star").u_locs.at("ModelMatrix"), 1, GL_FALSE, glm::value_ptr(star_mat));
+	uploadStarTransforms();
 
-	glBindVertexArray(star_object.vertex_AO);
-	glDrawArrays(star_object.draw_mode, 0, star_vector.size());
 }
 
 void ApplicationSolar::updateView() {
@@ -189,7 +183,7 @@ void ApplicationSolar::initializeShaderPrograms() {
 	m_shaders.at("planet").u_locs["ProjectionMatrix"] = -1;
 	m_shaders.at("planet").u_locs["Color"] = -1;
 	m_shaders.at("planet").u_locs["SunViewPos"] = -1;
-	m_shaders.at("planet").u_locs["TexturesNum"] = -1;
+	m_shaders.at("planet").u_locs["ColorTex"] = -1;
 
 	// star uniforms:
 	m_shaders.emplace("star", shader_program{ m_resource_path + "shaders/star.vert",
@@ -280,8 +274,6 @@ void ApplicationSolar::initializeTextures() {
 		earth_pxdat.channel_type, /* pixel format */
 		earth_pxdat.ptr()         /* data_ptr */
 		);
-
-	std::cout << "initializing textures..." << std::endl;
 }
 
 
@@ -302,7 +294,7 @@ glm::fmat4 ApplicationSolar::uploadPlanetTransforms(planet const& pl) const {
 	glUniform3f(m_shaders.at("planet").u_locs.at("Color"), pl.color.x, pl.color.y, pl.color.z);
 
 	// give number of planet textures to fragment shader
-	glUniform1i(m_shaders.at("planet").u_locs.at("TexturesNum"), 1);
+	glUniform1i(m_shaders.at("planet").u_locs.at("ColorTex"), 1);
 
 	// bind the VAO to draw
 	glBindVertexArray(planet_object.vertex_AO);
@@ -336,6 +328,17 @@ void ApplicationSolar::uploadMoonTransforms(planet const& mo, glm::fmat4 const& 
 	glDrawElements(planet_object.draw_mode, planet_object.num_elements, model::INDEX.type, NULL);
 }
 
+
+void ApplicationSolar::uploadStarTransforms() const {
+	//use star shader
+	glUseProgram(m_shaders.at("star").handle);
+	glm::fmat4 star_mat = glm::scale(glm::fmat4{}, glm::fvec3{100.0}); // spread out the stars
+	star_mat = glm::translate(star_mat, glm::fvec3{-0.5, -0.5, -0.5});
+	glUniformMatrix4fv(m_shaders.at("star").u_locs.at("ModelMatrix"), 1, GL_FALSE, glm::value_ptr(star_mat));
+
+	glBindVertexArray(star_object.vertex_AO);
+	glDrawArrays(star_object.draw_mode, 0, star_vector.size());
+}
 
 // exe entry point
 int main(int argc, char* argv[]) {
