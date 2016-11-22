@@ -181,7 +181,7 @@ void ApplicationSolar::initializeShaderPrograms() {
 	m_shaders.at("planet").u_locs["ModelMatrix"] = -1;
 	m_shaders.at("planet").u_locs["ViewMatrix"] = -1;
 	m_shaders.at("planet").u_locs["ProjectionMatrix"] = -1;
-	m_shaders.at("planet").u_locs["Color"] = -1;
+	// m_shaders.at("planet").u_locs["Color"] = -1;
 	m_shaders.at("planet").u_locs["SunViewPos"] = -1;
 	m_shaders.at("planet").u_locs["ColorTex"] = -1;
 
@@ -291,7 +291,7 @@ glm::fmat4 ApplicationSolar::uploadPlanetTransforms(planet const& pl) const {
 	glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("NormalMatrix"),
 		1, GL_FALSE, glm::value_ptr(normal_matrix));
 
-	glUniform3f(m_shaders.at("planet").u_locs.at("Color"), pl.color.x, pl.color.y, pl.color.z);
+	// glUniform3f(m_shaders.at("planet").u_locs.at("Color"), pl.color.x, pl.color.y, pl.color.z);
 
 	// give number of planet textures to fragment shader
 	glUniform1i(m_shaders.at("planet").u_locs.at("ColorTex"), 1);

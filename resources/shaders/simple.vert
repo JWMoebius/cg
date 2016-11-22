@@ -11,13 +11,11 @@ uniform mat4 ModelMatrix;
 uniform mat4 ViewMatrix;
 uniform mat4 ProjectionMatrix;
 uniform mat4 NormalMatrix;
-uniform vec3 Color;
 uniform vec3 SunViewPos; // position of sun in view space
 
 out vec3 pass_Normal;
 out vec4 frag_pos; // pass fragment position in view space
 out vec3 incidence_ray; // pass sun position in view space
-out vec3 col_planet;
 out vec2 pass_Texcoord;
 
 void main(void)
@@ -27,5 +25,5 @@ void main(void)
   frag_pos = ViewMatrix * ModelMatrix * vec4(in_Position, 1.0);
   // incidence vector from light source to fragment position:
   incidence_ray = SunViewPos - vec3(frag_pos);
-  col_planet = Color;
+  pass_Texcoord = in_Texcoord;
 }
