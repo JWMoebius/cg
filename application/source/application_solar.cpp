@@ -22,6 +22,12 @@ using namespace gl;
 #include <ctime>
 #include <cmath>
 
+
+float random_number(float min, float max) {
+	float rand_num = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+	return (max-min) * rand_num;
+}
+
 ApplicationSolar::ApplicationSolar(std::string const& resource_path)
 	:Application{ resource_path }
 	, planet_object{}, planet_vector{}, star_object{}
@@ -32,9 +38,10 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
 	initializeShaderPrograms();
 }
 
-float random_number(float min, float max) {
-	float rand_num = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
-	return (max-min) * rand_num;
+ApplicationSolar::~ApplicationSolar() {
+	glDeleteBuffers(1, &planet_object.vertex_BO);
+	glDeleteBuffers(1, &planet_object.element_BO);
+	glDeleteVertexArrays(1, &planet_object.vertex_AO);
 }
 
 void ApplicationSolar::create_scene() {
@@ -197,7 +204,7 @@ void ApplicationSolar::initializeShaderPrograms() {
 
 // load models
 void ApplicationSolar::initializeGeometry() {
-	model planet_model = model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL);
+	model planet_model = model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL | model::TEXCOORD);
 
 	// generate vertex array object
 	glGenVertexArrays(1, &planet_object.vertex_AO);
@@ -248,11 +255,7 @@ void ApplicationSolar::initializeGeometry() {
 	star_object.draw_mode = GL_POINTS;
 }
 
-ApplicationSolar::~ApplicationSolar() {
-	glDeleteBuffers(1, &planet_object.vertex_BO);
-	glDeleteBuffers(1, &planet_object.element_BO);
-	glDeleteVertexArrays(1, &planet_object.vertex_AO);
-}
+
 
 glm::fmat4 ApplicationSolar::uploadPlanetTransforms(planet const& pl) const {
 	glm::fmat4 model_matrix = glm::rotate(glm::fmat4{}, float(glfwGetTime()) * pl.rotation_velocity, glm::fvec3{ 0.0f, 1.0f, 0.0f });
