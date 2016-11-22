@@ -222,10 +222,15 @@ void ApplicationSolar::initializeGeometry() {
 	glEnableVertexAttribArray(0);
 	// first attribute is 3 floats with no offset & stride
 	glVertexAttribPointer(0, model::POSITION.components, model::POSITION.type, GL_FALSE, planet_model.vertex_bytes, planet_model.offsets[model::POSITION]);
+
 	// activate second attribute on gpu
 	glEnableVertexAttribArray(1);
 	// second attribute is 3 floats with no offset & stride
 	glVertexAttribPointer(1, model::NORMAL.components, model::NORMAL.type, GL_FALSE, planet_model.vertex_bytes, planet_model.offsets[model::NORMAL]);
+
+	// texture coords:
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, model::TEXCOORD.components, model::TEXCOORD.type, GL_FALSE, planet_model.vertex_bytes, planet_model.offsets[model::TEXCOORD]);
 
 	// generate generic buffer
 	glGenBuffers(1, &planet_object.element_BO);
