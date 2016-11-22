@@ -4,6 +4,9 @@ in vec3 pass_Normal;
 in vec4 frag_pos; // fragment position in view space
 in vec3 incidence_ray; // incidence vector of the sun
 in vec3 col_planet; // planet color
+in vec2 texcoord; // planet texture coordinates
+
+uniform sampler2D TexturesNum;
 
 out vec4 out_Color;
 

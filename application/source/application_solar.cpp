@@ -4,6 +4,7 @@
 #include "utils.hpp"
 #include "shader_loader.hpp"
 #include "model_loader.hpp"
+#include "texture_loader.hpp"
 
 #include <glbinding/gl/gl.h>
 // use gl definitions from glbinding
@@ -31,6 +32,7 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
 
 	initializeGeometry();
 	initializeShaderPrograms();
+	initializeTextures();
 }
 
 ApplicationSolar::~ApplicationSolar() {
@@ -187,7 +189,7 @@ void ApplicationSolar::initializeShaderPrograms() {
 	m_shaders.at("planet").u_locs["ProjectionMatrix"] = -1;
 	m_shaders.at("planet").u_locs["Color"] = -1;
 	m_shaders.at("planet").u_locs["SunViewPos"] = -1;
-
+	m_shaders.at("planet").u_locs["TexturesNum"] = -1;
 
 	// star uniforms:
 	m_shaders.emplace("star", shader_program{ m_resource_path + "shaders/star.vert",
@@ -256,6 +258,32 @@ void ApplicationSolar::initializeGeometry() {
 }
 
 
+void ApplicationSolar::initializeTextures() {
+	pixel_data earth_pxdat = texture_loader::file(m_resource_path + "textures/earth.png");
+
+	texture_object earth_tex{};
+
+	glActiveTexture(GL_TEXTURE1);
+	glGenTextures(1, &earth_tex.handle);
+	glBindTexture(GL_TEXTURE_2D, earth_tex.handle);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glTexImage2D(
+		GL_TEXTURE_2D,
+		0,                        /* detail level */
+		GL_RGB8,                  /* internal image_format */
+		earth_pxdat.width,        /* texture_width */
+		earth_pxdat.height,       /* texture_height */
+		0,                        /* this value must be 0. (historic reasons -.-) */
+		earth_pxdat.channels,     /* channel format */
+		earth_pxdat.channel_type, /* pixel format */
+		earth_pxdat.ptr()         /* data_ptr */
+		);
+
+	std::cout << "initializing textures..." << std::endl;
+}
+
 
 glm::fmat4 ApplicationSolar::uploadPlanetTransforms(planet const& pl) const {
 	glm::fmat4 model_matrix = glm::rotate(glm::fmat4{}, float(glfwGetTime()) * pl.rotation_velocity, glm::fvec3{ 0.0f, 1.0f, 0.0f });
@@ -272,6 +300,9 @@ glm::fmat4 ApplicationSolar::uploadPlanetTransforms(planet const& pl) const {
 		1, GL_FALSE, glm::value_ptr(normal_matrix));
 
 	glUniform3f(m_shaders.at("planet").u_locs.at("Color"), pl.color.x, pl.color.y, pl.color.z);
+
+	// give number of planet textures to fragment shader
+	glUniform1i(m_shaders.at("planet").u_locs.at("TexturesNum"), 1);
 
 	// bind the VAO to draw
 	glBindVertexArray(planet_object.vertex_AO);

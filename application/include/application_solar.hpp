@@ -29,6 +29,7 @@ class ApplicationSolar : public Application {
  protected:
   void initializeShaderPrograms();
   void initializeGeometry();
+  void initializeTextures();
   void updateView();
   glm::fmat4 uploadPlanetTransforms(planet const&) const;
   void uploadMoonTransforms(planet const&, glm::fmat4 const&) const;
