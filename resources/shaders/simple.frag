@@ -4,11 +4,11 @@ in vec3 pass_Normal;
 in vec4 frag_pos; // fragment position in view space
 in vec3 incidence_ray; // incidence vector of the sun
 in vec2 pass_Texcoord; // planet texture coordinates
+flat in int pass_NumPlanet;
 
 uniform sampler2D ColorTex; // index of texture unit
 
 out vec4 out_Color;
-
 vec3 col_sun = vec3(1.0, 1.0, 0.0);
 
 void main() {
@@ -31,5 +31,7 @@ void main() {
   vec3 light_spec = vec3(pow(product, 4));
 
   out_Color = texcolor + vec4(light_spec, 1.0);
+//Skybox Exemption
+
   // out_Color = vec4(pass_Texcoord.xy, 0, 1);
 }

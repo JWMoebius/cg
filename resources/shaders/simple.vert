@@ -11,12 +11,14 @@ uniform mat4 ModelMatrix;
 uniform mat4 ViewMatrix;
 uniform mat4 ProjectionMatrix;
 uniform mat4 NormalMatrix;
+uniform int NumPlanet;
 uniform vec3 SunViewPos; // position of sun in view space
 
 out vec3 pass_Normal;
 out vec4 frag_pos; // pass fragment position in view space
 out vec3 incidence_ray; // pass sun position in view space
 out vec2 pass_Texcoord;
+flat out int pass_NumPlanet;
 
 void main(void)
 {
@@ -26,4 +28,9 @@ void main(void)
   // incidence vector from light source to fragment position:
   incidence_ray = SunViewPos - vec3(frag_pos);
   pass_Texcoord = in_Texcoord;
+
+//Skybox Exemption
+  if(NumPlanet == 11) {
+    pass_Normal = -pass_Normal * (-1);
+  }
 }
