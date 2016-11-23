@@ -31,7 +31,7 @@ class ApplicationSolar : public Application {
   void initializeGeometry();
   void initializeTextures() const;
   void updateView();
-  glm::fmat4 uploadPlanetTransforms(planet const&) const;
+  glm::fmat4 uploadPlanetTransforms(planet const&, const unsigned index) const;
   void uploadMoonTransforms(planet const&, glm::fmat4 const&) const;
   void uploadStarTransforms() const;
 

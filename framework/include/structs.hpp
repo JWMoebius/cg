@@ -20,6 +20,7 @@ struct planet {
   float rotation_velocity;
   glm::fvec3 distance_to_origin;
   glm::fvec3 color;
+  std::string texture_path;
 };
 
 //star representation

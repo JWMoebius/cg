@@ -30,8 +30,8 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
 {
 	create_scene();
 
-	initializeGeometry();
 	initializeTextures();
+	initializeGeometry();
 	initializeShaderPrograms();
 }
 
@@ -42,17 +42,17 @@ ApplicationSolar::~ApplicationSolar() {
 }
 
 void ApplicationSolar::create_scene() {
-	planet Moon{ 0.7f, 8.0f, glm::fvec3{ 5.0f, 0.0f, 1.0f }, glm::fvec3{ 0.7f, 0.7f, 0.7f } };
 
-	planet Sun{ 0.5f, 5.5f, glm::fvec3{ 0.0, 0.0f, 0.0f }, glm::fvec3{ 1.0f, 1.0f, 1.0f } };
-	planet Mercury{ 0.1f, 15.0f, glm::fvec3{ 15.0f, 0.0f, 15.0f }, glm::fvec3{ 0.8f, 0.8f, 0.1f } };
-	planet Venus{ 0.1f, 0.1f, glm::fvec3{ 10.6f, 0.0f, 10.6f }, glm::fvec3{ 0.8f, 0.1f, 0.2f } };
-	planet Earth{ 0.07f, 0.9f, glm::fvec3{ 10.0f, 0.0f, 10.0f }, glm::fvec3{ 0.0f, 0.2f, 0.9f } };
-	planet Mars{ 0.5f, 2.0f, glm::fvec3{ 25.1f, 0.0f, 25.1f }, glm::fvec3{ 0.7f, 0.0f, 0.0f } };
-	planet Jupiter{ 0.1f, 0.7f, glm::fvec3{ 35.2f, 0.0f, 35.5f }, glm::fvec3{ 0.3f, 0.3f, 0.3f } };
-	planet Saturn{ 1.5f, 3.0f, glm::fvec3{ 20.0f, 0.0f, 20.0f }, glm::fvec3{ 0.5f, 0.5f, 0.2f } };
-	planet Uranus{ 0.2f, 4.5f, glm::fvec3{ 22.0f, 0.1f, 23.45f }, glm::fvec3{ 0.0f, 0.4f, 1.0f } };
-	planet Neptune{ 0.6f, 0.3f, glm::fvec3{ 30.5f, 0.0f, 30.5f }, glm::fvec3{ 0.0f, 0.0f, 1.0f } };
+	planet Sun    { 0.5f, 5.5f,  glm::fvec3{ 0.0, 0.0f, 0.0f },     glm::fvec3{ 1.0f, 1.0f, 1.0f }, "textures/sun.png" };
+	planet Mercury{ 0.1f, 15.0f, glm::fvec3{ 15.0f, 0.0f, 15.0f },  glm::fvec3{ 0.8f, 0.8f, 0.1f }, "textures/mercury.png"};
+	planet Venus  { 0.1f, 0.1f,  glm::fvec3{ 10.6f, 0.0f, 10.6f },  glm::fvec3{ 0.8f, 0.1f, 0.2f }, "textures/venus.png" };
+	planet Earth  { 0.07f, 0.9f, glm::fvec3{ 10.0f, 0.0f, 10.0f },  glm::fvec3{ 0.0f, 0.2f, 0.9f }, "textures/earth.png" };
+	planet Moon   { 0.7f, 8.0f,  glm::fvec3{ 5.0f, 0.0f, 1.0f },    glm::fvec3{ 0.7f, 0.7f, 0.7f }, "textures/moon.png" };
+	planet Mars   { 0.5f, 2.0f,  glm::fvec3{ 25.1f, 0.0f, 25.1f },  glm::fvec3{ 0.7f, 0.0f, 0.0f }, "textures/mars.png" };
+	planet Jupiter{ 0.1f, 0.7f,  glm::fvec3{ 35.2f, 0.0f, 35.5f },  glm::fvec3{ 0.3f, 0.3f, 0.3f }, "textures/jupiter.png" };
+	planet Saturn { 1.5f, 3.0f,  glm::fvec3{ 20.0f, 0.0f, 20.0f },  glm::fvec3{ 0.5f, 0.5f, 0.2f }, "textures/saturn.png" };
+	planet Uranus { 0.2f, 4.5f,  glm::fvec3{ 22.0f, 0.1f, 23.45f }, glm::fvec3{ 0.0f, 0.4f, 1.0f }, "textures/uranus.png" };
+	planet Neptune{ 0.6f, 0.3f,  glm::fvec3{ 30.5f, 0.0f, 30.5f },  glm::fvec3{ 0.0f, 0.0f, 1.0f }, "textures/neptune.png" };
 
 	planet_vector.push_back(Earth);
 	planet_vector.push_back(Moon);
@@ -63,6 +63,7 @@ void ApplicationSolar::create_scene() {
 	planet_vector.push_back(Jupiter);
 	planet_vector.push_back(Saturn);
 	planet_vector.push_back(Uranus);
+
 
 	// initialise 100000 stars at pseudo-random positions.
 	// star colors depend on their position
@@ -88,18 +89,17 @@ void ApplicationSolar::create_scene() {
 
 void ApplicationSolar::render() const {
 	// earth and moon get a special treatment for the moment
-	glm::fmat4 earth_mat = uploadPlanetTransforms(planet_vector.front());
+	glm::fmat4 earth_mat = uploadPlanetTransforms(planet_vector.front(), 1);
 	planet Moon = planet_vector.at(1);
 	uploadMoonTransforms(Moon, earth_mat);
 
 	// Draw for all predefined planets in planet_vector depending on their attributes
 	for (auto i = planet_vector.begin()+2; i != planet_vector.end(); ++i) {
-		uploadPlanetTransforms(*i);
+		uploadPlanetTransforms(*i, i-planet_vector.begin()+1);
 	}
 
 	//Stars:
 	uploadStarTransforms();
-
 }
 
 void ApplicationSolar::updateView() {
@@ -178,7 +178,6 @@ void ApplicationSolar::initializeShaderPrograms() {
 	m_shaders.at("planet").u_locs["ModelMatrix"] = -1;
 	m_shaders.at("planet").u_locs["ViewMatrix"] = -1;
 	m_shaders.at("planet").u_locs["ProjectionMatrix"] = -1;
-	// m_shaders.at("planet").u_locs["Color"] = -1;
 	m_shaders.at("planet").u_locs["SunViewPos"] = -1;
 	m_shaders.at("planet").u_locs["ColorTex"] = -1;
 
@@ -250,31 +249,37 @@ void ApplicationSolar::initializeGeometry() {
 
 
 void ApplicationSolar::initializeTextures() const {
-	pixel_data earth_pxdat = texture_loader::file(m_resource_path + "textures/earth.png");
+	unsigned i = 1;
+	for (auto pl : planet_vector) {
+		pixel_data planet_pxdat = texture_loader::file(m_resource_path + pl.texture_path);
 
-	texture_object earth_tex{};
+		texture_object planet_tex{};
 
-	glActiveTexture(GL_TEXTURE1);
-	glGenTextures(1, &earth_tex.handle);
-	glBindTexture(GL_TEXTURE_2D, earth_tex.handle);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		std::cout << i << std::endl;
+		glActiveTexture(GL_TEXTURE0 + i);
+		glGenTextures(1, &planet_tex.handle); // we always generate just one texture
+		glBindTexture(GL_TEXTURE_2D, planet_tex.handle);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	glTexImage2D(
-		GL_TEXTURE_2D,
-		0,                        /* detail level */
-		earth_pxdat.channels,                  /* internal image_format */
-		earth_pxdat.width,        /* texture_width */
-		earth_pxdat.height,       /* texture_height */
-		0,                        /* this value must be 0. (historic reasons -.-) */
-		earth_pxdat.channels,     /* channel format */
-		earth_pxdat.channel_type, /* pixel format */
-		earth_pxdat.ptr()         /* data_ptr */
-		);
+		glTexImage2D(
+			GL_TEXTURE_2D,
+			0,                        /* detail level */
+			planet_pxdat.channels,     /* internal image_format */
+			planet_pxdat.width,        /* texture_width */
+			planet_pxdat.height,       /* texture_height */
+			0,                        /* this value must be 0. (historic reasons -.-) */
+			planet_pxdat.channels,     /* channel format */
+			planet_pxdat.channel_type, /* pixel format */
+			planet_pxdat.ptr()         /* data_ptr */
+			);
+
+		++i;
+	}
 }
 
 
-glm::fmat4 ApplicationSolar::uploadPlanetTransforms(planet const& pl) const {
+glm::fmat4 ApplicationSolar::uploadPlanetTransforms(planet const& pl, const unsigned index) const {
 	glUseProgram(m_shaders.at("planet").handle);
 	glm::fmat4 model_matrix = glm::rotate(glm::fmat4{}, float(glfwGetTime()) * pl.rotation_velocity, glm::fvec3{ 0.0f, 1.0f, 0.0f });
 	model_matrix = glm::scale(model_matrix, glm::fvec3{pl.size}); // Scales the matrix depending on the size of the planet
@@ -289,10 +294,8 @@ glm::fmat4 ApplicationSolar::uploadPlanetTransforms(planet const& pl) const {
 	glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("NormalMatrix"),
 		1, GL_FALSE, glm::value_ptr(normal_matrix));
 
-	// glUniform3f(m_shaders.at("planet").u_locs.at("Color"), pl.color.x, pl.color.y, pl.color.z);
-
 	// give index of planet texture to fragment shader
-	glUniform1i(m_shaders.at("planet").u_locs.at("ColorTex"), 1);
+	glUniform1i(m_shaders.at("planet").u_locs.at("ColorTex"), index);
 
 	// bind the VAO to draw
 	glBindVertexArray(planet_object.vertex_AO);
