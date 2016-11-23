@@ -94,8 +94,8 @@ void ApplicationSolar::render() const {
 	uploadMoonTransforms(Moon, earth_mat);
 
 	// Draw for all predefined planets in planet_vector depending on their attributes
-	for (auto i = planet_vector.begin()+2; i != planet_vector.end(); ++i) {
-		uploadPlanetTransforms(*i, i-planet_vector.begin()+1);
+	for (unsigned i = 2; i < planet_vector.size(); ++i) {
+		uploadPlanetTransforms(planet_vector.at(i), i+1);
 	}
 
 	//Stars:
