@@ -31,8 +31,8 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
 	create_scene();
 
 	initializeGeometry();
-	initializeShaderPrograms();
 	initializeTextures();
+	initializeShaderPrograms();
 }
 
 ApplicationSolar::~ApplicationSolar() {
@@ -87,9 +87,6 @@ void ApplicationSolar::create_scene() {
 }
 
 void ApplicationSolar::render() const {
-	// bind shader to upload uniforms
-	glUseProgram(m_shaders.at("planet").handle);
-
 	// earth and moon get a special treatment for the moment
 	glm::fmat4 earth_mat = uploadPlanetTransforms(planet_vector.front());
 	planet Moon = planet_vector.at(1);
@@ -252,7 +249,7 @@ void ApplicationSolar::initializeGeometry() {
 }
 
 
-void ApplicationSolar::initializeTextures() {
+void ApplicationSolar::initializeTextures() const {
 	pixel_data earth_pxdat = texture_loader::file(m_resource_path + "textures/earth.png");
 
 	texture_object earth_tex{};
@@ -266,7 +263,7 @@ void ApplicationSolar::initializeTextures() {
 	glTexImage2D(
 		GL_TEXTURE_2D,
 		0,                        /* detail level */
-		GL_RGB8,                  /* internal image_format */
+		earth_pxdat.channels,                  /* internal image_format */
 		earth_pxdat.width,        /* texture_width */
 		earth_pxdat.height,       /* texture_height */
 		0,                        /* this value must be 0. (historic reasons -.-) */
@@ -278,6 +275,7 @@ void ApplicationSolar::initializeTextures() {
 
 
 glm::fmat4 ApplicationSolar::uploadPlanetTransforms(planet const& pl) const {
+	glUseProgram(m_shaders.at("planet").handle);
 	glm::fmat4 model_matrix = glm::rotate(glm::fmat4{}, float(glfwGetTime()) * pl.rotation_velocity, glm::fvec3{ 0.0f, 1.0f, 0.0f });
 	model_matrix = glm::scale(model_matrix, glm::fvec3{pl.size}); // Scales the matrix depending on the size of the planet
 	model_matrix = glm::translate(model_matrix, pl.distance_to_origin);
@@ -293,7 +291,7 @@ glm::fmat4 ApplicationSolar::uploadPlanetTransforms(planet const& pl) const {
 
 	// glUniform3f(m_shaders.at("planet").u_locs.at("Color"), pl.color.x, pl.color.y, pl.color.z);
 
-	// give number of planet textures to fragment shader
+	// give index of planet texture to fragment shader
 	glUniform1i(m_shaders.at("planet").u_locs.at("ColorTex"), 1);
 
 	// bind the VAO to draw
@@ -307,7 +305,7 @@ glm::fmat4 ApplicationSolar::uploadPlanetTransforms(planet const& pl) const {
 
 
 void ApplicationSolar::uploadMoonTransforms(planet const& mo, glm::fmat4 const& parent_mat) const {
-
+	glUseProgram(m_shaders.at("planet").handle);
 	glm::fmat4 moon_mat = glm::rotate(parent_mat, float(glfwGetTime()) * mo.rotation_velocity, glm::fvec3{0.0f, 1.0f, 0.0f});
 	moon_mat = glm::scale(moon_mat, glm::fvec3{mo.size});
 	moon_mat = glm::translate(moon_mat, mo.distance_to_origin);

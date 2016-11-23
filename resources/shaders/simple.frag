@@ -3,17 +3,17 @@
 in vec3 pass_Normal;
 in vec4 frag_pos; // fragment position in view space
 in vec3 incidence_ray; // incidence vector of the sun
-in vec2 texcoord; // planet texture coordinates
+in vec2 pass_Texcoord; // planet texture coordinates
 
-uniform sampler2D ColorTex;
+uniform sampler2D ColorTex; // index of texture unit
 
 out vec4 out_Color;
 
 vec3 col_sun = vec3(1.0, 1.0, 0.0);
 
 void main() {
-/*   //Blinn-Phong reflection model:
-
+  //Blinn-Phong reflection model:
+/*
   // ambient:
   // arbitrary factor for good looks
   vec3 light_amb = col_sun * col_planet;
@@ -23,7 +23,7 @@ void main() {
   float lambert = max(dot(normalize(incidence_ray), normalize(pass_Normal)), 0.0);
   vec3 light_dif = col_sun * col_planet * vec3(lambert);
 */
-  vec4 texcolor = texture(ColorTex, texcoord);
+  vec4 texcolor = texture(ColorTex, pass_Texcoord);
 
   // specular:
   vec3 halfway = normalize(incidence_ray + vec3(frag_pos));
@@ -31,6 +31,5 @@ void main() {
   vec3 light_spec = vec3(pow(product, 4));
 
   out_Color = texcolor + vec4(light_spec, 1.0);
-
-
+  // out_Color = vec4(pass_Texcoord.xy, 0, 1);
 }
