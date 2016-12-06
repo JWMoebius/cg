@@ -28,4 +28,8 @@ void main() {
   vec4 light_spec = vec4(pow(product, 4));
 
   out_Color = light_amb + light_dif + light_spec;
+
+  if (pass_NumPlanet == 11) {
+    out_Color = texcolor;
+  }
 }

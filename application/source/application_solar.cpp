@@ -66,6 +66,7 @@ void ApplicationSolar::create_scene() {
 	planet_vector.push_back(Jupiter);
 	planet_vector.push_back(Saturn);
 	planet_vector.push_back(Uranus);
+	planet_vector.push_back(Neptune);
 	planet_vector.push_back(Skybox);
 
 	// initialise 100000 stars at pseudo-random positions.
@@ -93,12 +94,12 @@ void ApplicationSolar::create_scene() {
 void ApplicationSolar::render() const {
 
 	// Draw for all predefined planets in planet_vector depending on their attributes
-	unsigned i = 0;
+	unsigned i = 1;
 	for (auto pl : planet_vector) {
 		if (pl->parent != nullptr) {
-			pl->transform = uploadPlanetTransforms(*pl, i+1, pl->parent->transform);
+			pl->transform = uploadPlanetTransforms(*pl, i, pl->parent->transform);
 		} else {
-			pl->transform = uploadPlanetTransforms(*pl, i+1, glm::fmat4{});
+			pl->transform = uploadPlanetTransforms(*pl, i, glm::fmat4{});
 		}
 		++i;
 	}

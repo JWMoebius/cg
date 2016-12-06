@@ -28,9 +28,10 @@ void main(void)
   // incidence vector from light source to fragment position:
   incidence_ray = SunViewPos - vec3(frag_pos);
   pass_Texcoord = in_Texcoord;
+  pass_NumPlanet = NumPlanet;
 
-//Skybox Exemption
+  //Skybox Exemption
   if(NumPlanet == 11) {
-    pass_Normal = -pass_Normal * (-1);
+    pass_Normal = -pass_Normal;
   }
 }
