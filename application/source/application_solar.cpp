@@ -257,7 +257,6 @@ void ApplicationSolar::initializeTextures() const {
 
 		texture_object planet_tex{};
 
-		std::cout << i << std::endl;
 		glActiveTexture(GL_TEXTURE0 + i);
 		glGenTextures(1, &planet_tex.handle); // we always generate just one texture
 		glBindTexture(GL_TEXTURE_2D, planet_tex.handle);
