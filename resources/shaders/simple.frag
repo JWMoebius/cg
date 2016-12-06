@@ -9,7 +9,7 @@ flat in int pass_NumPlanet;
 uniform sampler2D ColorTex; // index of texture unit
 
 out vec4 out_Color;
-vec4 col_sun = vec4(1.0, 1.0, 0.0, 1.0);
+vec4 col_sun = vec4(1.0, 1.0, 1.0, 1.0);
 
 void main() {
   vec4 texcolor = texture(ColorTex, pass_Texcoord);
@@ -28,8 +28,4 @@ void main() {
   vec4 light_spec = vec4(pow(product, 4));
 
   out_Color = light_amb + light_dif + light_spec;
-
-//Skybox Exemption
-
-  // out_Color = vec4(pass_Texcoord.xy, 0, 1);
 }

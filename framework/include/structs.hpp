@@ -15,11 +15,14 @@ using namespace gl;
 
 
 //planet representation
+struct planet;
+typedef std::shared_ptr<planet> planet_ptr;
 struct planet {
   float size;
   float rotation_velocity;
   glm::fvec3 distance_to_origin;
-  glm::fvec3 color;
+  planet_ptr parent;
+  glm::fmat4 transform;
   std::string texture_path;
 };
 

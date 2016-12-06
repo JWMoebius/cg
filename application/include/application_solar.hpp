@@ -31,15 +31,16 @@ class ApplicationSolar : public Application {
   void initializeGeometry();
   void initializeTextures() const;
   void updateView();
-  glm::fmat4 uploadPlanetTransforms(planet const&, const unsigned index) const;
-  void uploadMoonTransforms(planet const&, glm::fmat4 const&) const;
+  glm::fmat4 uploadPlanetTransforms(planet const&, const unsigned index, glm::fmat4 const&) const;
+  // void uploadMoonTransforms(planet const&, glm::fmat4 const&) const;
   void uploadStarTransforms() const;
 
   // cpu representation of model
-  std::vector<planet> planet_vector;
+  std::vector<planet_ptr> planet_vector;
   model_object planet_object;
   std::vector<star> star_vector;
   model_object star_object; //gpu representation of star
+  std::map<std::string, std::string> texture_names;
 };
 
 #endif

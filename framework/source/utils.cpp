@@ -15,7 +15,23 @@ namespace utils {
 texture_object create_texture_object(pixel_data const& tex) {
   texture_object t_obj{};
 
-  throw std::logic_error("Texture Object creation not implemented yet");
+  glGenTextures(1, &t_obj.handle); // we always generate just one texture
+  glBindTexture(GL_TEXTURE_2D, t_obj.handle);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+  glTexImage2D(
+    GL_TEXTURE_2D,
+    0,                        /* detail level */
+    tex.channels,     /* internal image_format */
+    tex.width,        /* texture_width */
+    tex.height,       /* texture_height */
+    0,                        /* this value must be 0. (historic reasons -.-) */
+    tex.channels,     /* channel format */
+    tex.channel_type, /* pixel format */
+    tex.ptr()         /* data_ptr */
+    );
+  // throw std::logic_error("Texture Object creation not implemented yet");
 
   return t_obj;
 }
