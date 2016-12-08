@@ -12,6 +12,31 @@ using namespace gl;
 
 namespace utils {
 
+
+texture_object create_default_texture_object() {
+  // creates default texture object
+  texture_object t_obj{};
+
+  glGenTextures(1, &t_obj.handle); // we always generate just one texture
+  glBindTexture(GL_TEXTURE_2D, t_obj.handle);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+  glTexImage2D(
+    GL_TEXTURE_2D,
+    0,                        /* detail level */
+    GLint(GL_RGB),     /* internal image_format */
+    800,        /* texture_width */
+    800,       /* texture_height */
+    0,                        /* this value must be 0. (historic reasons -.-) */
+    GL_RGBA,     /* channel format */
+    GL_UNSIGNED_BYTE, /* pixel format */
+    NULL         /* data_ptr */
+    );
+
+  return t_obj;
+}
+
 texture_object create_texture_object(pixel_data const& tex) {
   texture_object t_obj{};
 
@@ -31,7 +56,6 @@ texture_object create_texture_object(pixel_data const& tex) {
     tex.channel_type, /* pixel format */
     tex.ptr()         /* data_ptr */
     );
-  // throw std::logic_error("Texture Object creation not implemented yet");
 
   return t_obj;
 }

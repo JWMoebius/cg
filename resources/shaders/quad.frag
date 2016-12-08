@@ -6,5 +6,5 @@ uniform sampler2D ColorTex;
 
 void main()
 {
-pass_Color = texture(ColorTex, pass_Texcoord);
+    pass_Color = texture(ColorTex, pass_Texcoord);
 }

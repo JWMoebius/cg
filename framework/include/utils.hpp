@@ -9,6 +9,8 @@ struct pixel_data;
 struct texture_object;
 
 namespace utils {
+  // generate default texture
+  texture_object create_default_texture_object();
   // generate texture object from texture struct
   texture_object create_texture_object(pixel_data const& tex);
   // print bound textures for all texture units

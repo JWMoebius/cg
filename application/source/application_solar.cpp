@@ -27,14 +27,47 @@ using namespace gl;
 
 ApplicationSolar::ApplicationSolar(std::string const& resource_path)
 	:Application{ resource_path }
-	, planet_object{}, planet_vector{}, star_object{}
+	, planet_object{}, planet_vector{}, star_object{}, quad_tex{}, renderbuffer{}, framebuffer{}, quad_object{}
 {
 	create_scene();
 
 	initializeTextures();
 	initializeGeometry();
 	initializeShaderPrograms();
+	initializeFramebuffer();
 }
+
+
+// Wait till confirmed working
+void ApplicationSolar::initializeFramebuffer() {
+	texture_object quad_tex = utils::create_default_texture_object();
+
+	// renderbuffer
+	// GLuint renderbuffer;
+	glGenRenderbuffers(1, &renderbuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 800);
+
+	// framebuffer
+	// GLuint framebuffer;
+	glGenFramebuffers(1, &framebuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+	glFramebufferTexture(GL_FRAMEBUFFER,
+		GL_COLOR_ATTACHMENT4,
+		quad_tex.handle,
+		0);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER,
+		GL_DEPTH_ATTACHMENT,
+		GL_RENDERBUFFER, renderbuffer);
+
+	GLenum draw_buffers[1] = { GL_COLOR_ATTACHMENT4 };
+	glDrawBuffers(1, draw_buffers);
+	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if (status != GL_FRAMEBUFFER_COMPLETE) {
+		std::cout << "It hits the fan! Framebuffer is faulty.";
+	}
+}
+
 
 ApplicationSolar::~ApplicationSolar() {
 	glDeleteBuffers(1, &planet_object.vertex_BO);
@@ -92,6 +125,8 @@ void ApplicationSolar::create_scene() {
 }
 
 void ApplicationSolar::render() const {
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// Draw for all predefined planets in planet_vector depending on their attributes
 	unsigned i = 1;
@@ -106,13 +141,12 @@ void ApplicationSolar::render() const {
 
 	//Stars:
 	uploadStarTransforms();
-	glUseProgram(m_shaders.at("planet").handle);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glBindVertexArray(planet_object.vertex_AO);
+
+	glBindVertexArray(quad_object.vertex_AO);
+	glUseProgram(m_shaders.at("quad").handle);
 	glDisable(GL_DEPTH_TEST);
-
-	//glUseProgram(m_shaders.at("quad").handle);
-
+	//swap buffers:
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void ApplicationSolar::updateView() {
@@ -143,6 +177,31 @@ void ApplicationSolar::updateProjection() {
 	glUniformMatrix4fv(m_shaders.at("star").u_locs.at("ProjectionMatrix"),
 		1, GL_FALSE, glm::value_ptr(m_view_projection));
 	glUseProgram(m_shaders.at("planet").handle);
+
+	int win_width, win_height;
+	// m_window is hidden in launcher!
+	// glfwGetWindowSize(m_window, &win_width, &win_height);
+	win_width = 800;
+	win_height = 800;
+
+	// update texture with window size:
+  glBindTexture(GL_TEXTURE_2D, quad_tex.handle);
+  glTexImage2D(
+    GL_TEXTURE_2D,
+    0,                        /* detail level */
+    GLint(GL_RGB),     /* internal image_format */
+    win_width,        /* texture_width */
+    win_height,       /* texture_height */
+    0,                        /* this value must be 0. (historic reasons -.-) */
+    GL_RGBA,     /* channel format */
+    GL_UNSIGNED_BYTE, /* pixel format */
+    NULL         /* data_ptr */
+    );
+
+  // update renderbuffer with window size:
+ 	glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer);
+
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, win_width, win_height);
 }
 
 // update uniform locations
@@ -151,7 +210,7 @@ void ApplicationSolar::uploadUniforms() {
 
 	glUseProgram(m_shaders.at("planet").handle);
 	updateView();
-	// updateProjection();
+	updateProjection();
 }
 
 // handle key input
@@ -208,33 +267,13 @@ void ApplicationSolar::initializeShaderPrograms() {
 	m_shaders.at("star").u_locs["ViewMatrix"] = -1;
 	m_shaders.at("star").u_locs["ProjectionMatrix"] = -1;
 	m_shaders.at("star").u_locs["ModelMatrix"] = -1;
-}
-/* Wait till confirmed working
-void ApplicationSolar::initializeFramebuffer() {
-	GLuint framebuffer;
-	GLuint renderbuffer;
-	glGenRenderbuffers(1, &renderbuffer);
-	glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 800);
 
-	glGenFramebuffers(1, &framebuffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-	glFramebufferTexture(GL_FRAMEBUFFER,
-		GL_COLOR_ATTACHMENT4,
-		framebuffer,
-		0);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER,
-		GL_DEPTH_ATTACHMENT,
-		GL_RENDERBUFFER, renderbuffer);
-
-	GLenum draw_buffers[1] = { GL_COLOR_ATTACHMENT4 };
-	glDrawBuffers(1, draw_buffers);
-	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-	if (status != GL_FRAMEBUFFER_COMPLETE) {
-		std::cout << "It hits the fan! Framebuffer is faulty.";
-	}
+	// quad uniform:
+	m_shaders.at("quad").u_locs["ColorTex"] = -1;
 }
-*/
+
+
+
 // load models
 void ApplicationSolar::initializeGeometry() {
 	model planet_model = model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL | model::TEXCOORD);
@@ -291,6 +330,35 @@ void ApplicationSolar::initializeGeometry() {
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, NULL);
 
 	star_object.draw_mode = GL_POINTS;
+
+
+	//Quad:
+	/*
+		v4----v3
+		|      |
+		|      |
+		v1----v2
+	*/
+
+	std::vector<float> squad_model =
+	{
+		-1.0, -1.0, 0.0, //vertex1
+		1.0, -1.0, 0.0, //vertex2
+		-1.0, 1.0, 0.0, //vertex4
+		1.0, 1.0, 0.0  //vertex3
+	};
+
+	glGenVertexArrays(1, &quad_object.vertex_AO);
+	glBindVertexArray(quad_object.vertex_AO);
+
+	glGenBuffers(1, &quad_object.vertex_BO);
+	glBindBuffer(GL_ARRAY_BUFFER, quad_object.vertex_BO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * squad_model.size(), squad_model.data(), GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(float) * squad_model.size(), NULL);
+	quad_object.draw_mode = GL_TRIANGLE_STRIP;
+	quad_object.num_elements = GLsizei(sizeof(float) * squad_model.size());
 }
 
 
@@ -301,29 +369,6 @@ void ApplicationSolar::initializeTextures() const {
 
 		glActiveTexture(GL_TEXTURE0 + i);
 		texture_object planet_tex = utils::create_texture_object(planet_pxdat);
-		GLuint framebuffer;
-		GLuint renderbuffer;
-		glGenRenderbuffers(1, &renderbuffer);
-		glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600);
-
-		glGenFramebuffers(1, &framebuffer);
-		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-		glFramebufferTexture(GL_FRAMEBUFFER,
-			GL_COLOR_ATTACHMENT4,
-			framebuffer,
-			0);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER,
-			GL_DEPTH_ATTACHMENT,
-			GL_RENDERBUFFER, renderbuffer);
-
-		GLenum draw_buffers[1] = { GL_COLOR_ATTACHMENT4 };
-		glDrawBuffers(1, draw_buffers);
-		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-		if (status != GL_FRAMEBUFFER_COMPLETE) {
-			std::cout << "It hits the fan! Framebuffer is faulty.";
-		}
-
 
 		++i;
 	}
@@ -331,6 +376,7 @@ void ApplicationSolar::initializeTextures() const {
 
 
 glm::fmat4 ApplicationSolar::uploadPlanetTransforms(planet const& pl, const unsigned index, glm::fmat4 const& parent_mat) const {
+	glUseProgram(m_shaders.at("planet").handle);
 
 	// glm::fmat4 parent_pos = glm::translate(glm::fmat4{}, glm::fvec3(parent_mat[3]));
 	glm::fmat4 model_matrix = glm::rotate(parent_mat, float(glfwGetTime()) * pl.rotation_velocity, glm::fvec3{ 0.0f, 1.0f, 0.0f });
@@ -362,7 +408,7 @@ glm::fmat4 ApplicationSolar::uploadPlanetTransforms(planet const& pl, const unsi
 
 void ApplicationSolar::uploadStarTransforms() const {
 	//use star shader
-
+	glUseProgram(m_shaders.at("star").handle);
 	glm::fmat4 star_mat = glm::scale(glm::fmat4{}, glm::fvec3{ 100.0 }); // spread out the stars
 	star_mat = glm::translate(star_mat, glm::fvec3{ -0.5, -0.5, -0.5 });
 	glUniformMatrix4fv(m_shaders.at("star").u_locs.at("ModelMatrix"), 1, GL_FALSE, glm::value_ptr(star_mat));
