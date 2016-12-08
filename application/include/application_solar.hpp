@@ -45,6 +45,7 @@ class ApplicationSolar : public Application {
   GLuint renderbuffer;
   GLuint framebuffer;
   model_object quad_object;
+  int post_process = 1;
 };
 
 #endif
