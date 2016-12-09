@@ -30,7 +30,7 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
 	, planet_object{}, planet_vector{}, star_object{}, quad_tex{}, renderbuffer{}, framebuffer{}, quad_object{}
 {
 	create_scene();
-	glClearColor(1.0f, 0.0f, 0.0, 1.0);
+	glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
 	initializeTextures();
 	initializeFramebuffer();
 	initializeGeometry();
@@ -40,13 +40,13 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
 
 // Wait till confirmed working
 void ApplicationSolar::initializeFramebuffer() {
-	quad_tex = utils::create_default_texture_object();
+	texture_object quad_tex = utils::create_default_texture_object();
 
 	// renderbuffer
 
 	glGenRenderbuffers(1, &renderbuffer);
 	glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 640, 480);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, screen_width, screen_height);
 
 	// framebuffer
 	glGenFramebuffers(1, &framebuffer);
@@ -57,16 +57,17 @@ void ApplicationSolar::initializeFramebuffer() {
 	// Render to the texture
 	glGenTextures(1, &quad_tex.handle);
 
-	// "Bind" the newly created texture : all future texture functions will modify this texture
+	//Attach new texture
 	glBindTexture(GL_TEXTURE_2D, quad_tex.handle);
 
 
-	// Poor filtering. Needed !
+	// Filter
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-	// Give an empty image to OpenGL ( the last "0" )
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 640, 480, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+
+	// Give empty RGB texture 
+	glTexImage2D(GL_TEXTURE_2D, 0, GLint(GL_RGB), screen_width, screen_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
 	// specify texture attachment
 	glFramebufferTexture(GL_FRAMEBUFFER,
@@ -146,9 +147,9 @@ void ApplicationSolar::create_scene() {
 void ApplicationSolar::render() const {
 	// render to backbuffer:
 	glViewport(0, 0, 640, 480);
-	 glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 	 
-	 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
 	// Draw for all predefined planets in planet_vector depending on their attributes
@@ -167,7 +168,7 @@ void ApplicationSolar::render() const {
 	glUseProgram(m_shaders.at("planet").handle);
 	//swap buffers:
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// render screen quad:
    glUseProgram(m_shaders.at("quad").handle);
@@ -175,9 +176,13 @@ void ApplicationSolar::render() const {
    glActiveTexture(GL_TEXTURE0);
    glBindTexture(GL_TEXTURE_2D, quad_tex.handle);
    glUniform1i(m_shaders.at("quad").u_locs.at("ColorTex"), 13);
+   glUniform1f(m_shaders.at("quad").u_locs.at("luminance"),		post_process[0]);
+   glUniform1f(m_shaders.at("quad").u_locs.at("vertical"),		post_process[1]);
+   glUniform1f(m_shaders.at("quad").u_locs.at("horizontal"),	post_process[2]);
+   glUniform1f(m_shaders.at("quad").u_locs.at("blur"),			post_process[3]);
    glBindTexture(GL_TEXTURE_2D, quad_tex.handle);
    glBindVertexArray(quad_object.vertex_AO);
-   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+   glDrawArrays(GL_TRIANGLE_STRIP, 0, 6);
   // glDrawElements(quad_object.draw_mode, quad_object.num_elements, GL_UNSIGNED_INT, NULL);
 
 }
@@ -241,7 +246,7 @@ void ApplicationSolar::updateProjection() {
 // update uniform locations
 void ApplicationSolar::uploadUniforms() {
 	updateUniformLocations();
-
+	glUseProgram(m_shaders.at("quad").handle);
 	glUseProgram(m_shaders.at("planet").handle);
 	updateView();
 	updateProjection();
@@ -265,31 +270,45 @@ void ApplicationSolar::keyCallback(int key, int scancode, int action, int mods) 
 		m_view_transform = glm::translate(m_view_transform, glm::fvec3{ 0.1f, 0.0f, 0.0f });
 		updateView();
 	}
-	else if (key == GLFW_KEY_7) {
-		if (post_process % 7890 != 0) {
-			post_process += 9;
+	else if (key == GLFW_KEY_7 && action == GLFW_PRESS) {			//luminance preserving greyscale
+		if (post_process[0] == 0.0f) {
+			post_process[0] = 1.0f ;
 			updateView();
 		}
-			//Gauss
-
+		else {
+			post_process[0] = 0.0f;
+			updateView();
+		}
 	}
-	else if (key == GLFW_KEY_8) {
-		if (post_process % 7890 != 0)
-			//Gauss
-			post_process += 9;
-		updateView();
+	else if (key == GLFW_KEY_8 && action == GLFW_PRESS) {			//horizontal mirror
+		if (post_process[1] == 0.0f) {
+			post_process[1] = 1.0f;
+			updateView();
+		}
+		else {
+			post_process[1] = 0.0f;
+			updateView();
+		}
 	}
-	else if (key == GLFW_KEY_9) {
-		if (post_process % 7890 != 0)
-			//Gauss
-			post_process += 9;
-		updateView();
+	else if (key == GLFW_KEY_9 && action == GLFW_PRESS) {			//vertical mirror
+		if (post_process[2] == 0.0f) {
+			post_process[2] = 1.0f;
+			updateView();
+		}
+		else {
+			post_process[2] = 0.0f;
+			updateView();
+		}
 	}
-	else if (key == GLFW_KEY_0) {
-		if (post_process % 7890 != 0)
-			//Gauss
-			post_process += 9;
-		updateView();
+	else if (key == GLFW_KEY_0 && action == GLFW_PRESS) {			//Blur
+		if (post_process[3] == 0.0f) {
+			post_process[3] = 1.0f;
+			updateView();
+		}
+		else {
+			post_process[3] = 0.0f;
+			updateView();
+		}
 	}
 }
 
@@ -329,6 +348,12 @@ void ApplicationSolar::initializeShaderPrograms() {
 	m_shaders.emplace("quad", shader_program{ m_resource_path + "shaders/quad.vert",
 		m_resource_path + "shaders/quad.frag" });
 	m_shaders.at("quad").u_locs["ColorTex"] = -1;
+	m_shaders.at("quad").u_locs["luminance"] = -1;
+	m_shaders.at("quad").u_locs["vertical"] = -1;
+	m_shaders.at("quad").u_locs["horizontal"] = -1;
+	m_shaders.at("quad").u_locs["blur"] = -1;
+	//glUniform4f(m_shaders.at("quad").u_locs.at("postProcess"), 0.0, 0.0, 0.0, 0.0);
+	//glUniform3f(m_shaders.at("planet").u_locs.at("SunViewPos"), sun_pos.x, sun_pos.y, sun_pos.z);
 }
 
 // load models
@@ -404,7 +429,7 @@ void ApplicationSolar::initializeGeometry() {
 		-1.0, 1.0, 0.0, 0.0, 1.0, //vertex4[loc,uk]
 		1.0, 1.0, 0.0, 1.0, 1.0  //vertex3[loc,uk]
 	};
-	model quad_model = { squad_model, model::NORMAL | model::TEXCOORD };
+	model quad_model = { squad_model, model::POSITION | model::TEXCOORD };  //Create quad_model to use parameters for glVertexAttribPointer
 
 	glGenVertexArrays(1, &quad_object.vertex_AO);
 	glBindVertexArray(quad_object.vertex_AO);
@@ -413,13 +438,13 @@ void ApplicationSolar::initializeGeometry() {
 	glBindBuffer(GL_ARRAY_BUFFER, quad_object.vertex_BO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * squad_model.size(), squad_model.data(), GL_STATIC_DRAW);
 
-	//POSITION
+	//POSITION first Attribute on gpu
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, model::POSITION.components, model::POSITION.type, GL_FALSE, quad_model.vertex_bytes, quad_model.offsets[model::POSITION]);
 
 	glEnableVertexAttribArray(1);
-	// TEXCOORD
-	glVertexAttribPointer(1, model::TEXCOORD.components, model::POSITION.type, GL_FALSE, quad_model.vertex_bytes, quad_model.offsets[model::TEXCOORD]);
+	// TEXCOORD second Attribute on gpu
+	glVertexAttribPointer(1, model::TEXCOORD.components, model::TEXCOORD.type, GL_FALSE, quad_model.vertex_bytes, quad_model.offsets[model::TEXCOORD]);
 
 	quad_object.draw_mode = GL_TRIANGLE_STRIP;
 	quad_object.num_elements = GLsizei(sizeof(float) * squad_model.size());

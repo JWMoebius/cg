@@ -45,7 +45,9 @@ class ApplicationSolar : public Application {
   GLuint renderbuffer;
   GLuint framebuffer;
   model_object quad_object;
-  int post_process = 1;
+  int screen_width = 640;
+  int screen_height = 480;
+  std::vector<float> post_process = {0.0f,0.0f,0.0f,0.0f }; //Save state of input for a post_processing effect
 };
 
 #endif
