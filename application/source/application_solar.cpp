@@ -46,7 +46,7 @@ void ApplicationSolar::initializeFramebuffer() {
 	// GLuint renderbuffer;
 	glGenRenderbuffers(1, &renderbuffer);
 	glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 800, 800);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 640, 480);
 
 	// framebuffer
 	// GLuint framebuffer;
@@ -132,9 +132,9 @@ void ApplicationSolar::create_scene() {
 
 void ApplicationSolar::render() const {
 	// render to backbuffer:
-	// glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
- //  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	// glEnable(GL_DEPTH_TEST);
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_DEPTH_TEST);
 
 	// Draw for all predefined planets in planet_vector depending on their attributes
 	unsigned i = 1;
@@ -156,13 +156,14 @@ void ApplicationSolar::render() const {
 	glDisable(GL_DEPTH_TEST);
 
 	// render screen quad:
-  // glUseProgram(m_shaders.at("quad").handle);
+  glUseProgram(m_shaders.at("quad").handle);
 
-  // glUniform1i(m_shaders.at("quad").u_locs.at("ColorTex"), 13);
+  // tell quad.frag where to look for the quad texture
+  glUniform1i(m_shaders.at("quad").u_locs.at("ColorTex"), 13);
 
-  // glBindVertexArray(quad_object.vertex_AO);
-  // glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	// glDrawElements(quad_object.draw_mode, quad_object.num_elements, GLint, NULL);
+  glBindVertexArray(quad_object.vertex_AO);
+  glDrawArrays(quad_object.draw_mode, 0, quad_object.num_elements);
+  // glDrawElements(quad_object.draw_mode, quad_object.num_elements, GL_UNSIGNED_BYTE, NULL);
 
 }
 
@@ -198,8 +199,8 @@ void ApplicationSolar::updateProjection() {
 	// m_window is hidden in launcher!
 	// int win_width, win_height;
 	// glfwGetWindowSize(m_window, &win_width, &win_height);
-	// win_width = 800;
-	// win_height = 800;
+	// win_width = 640;
+	// win_height = 480;
 
 	// // update texture with window size:
  //  glBindTexture(GL_TEXTURE_2D, quad_tex.handle);
@@ -370,10 +371,10 @@ void ApplicationSolar::initializeGeometry() {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * squad_model.size(), squad_model.data(), GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(float) * squad_model.size(), NULL);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 
 	quad_object.draw_mode = GL_TRIANGLE_STRIP;
-	quad_object.num_elements = GLsizei(sizeof(float) * squad_model.size());
+	quad_object.num_elements = GLsizei(squad_model.size());
 }
 
 
