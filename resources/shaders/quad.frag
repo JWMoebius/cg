@@ -3,8 +3,7 @@
 in vec2 pass_Texcoord;
 in vec4 gl_FragCoord;
 out vec4 pass_Color;
-uniform sampler2D ColorTex; 
-uniform vec4 postProcess; 
+uniform sampler2D ColorTex;
 uniform float luminance;
 uniform float vertical;
 uniform float horizontal;
@@ -26,7 +25,7 @@ void main()
     }
     //Mirror Horizontal Modifies x-coordinate
     if (horizontal == 1.0) {
-        y_cord = 1 - y_cord; //reverses x_coordinate 
+        y_cord = 1 - y_cord; //reverses x_coordinate
         pass_Color = texture(ColorTex, vec2(x_cord, y_cord));
     }
     //Blur using 3x3 cell calculation via texture look-ups from the exercise slides
@@ -47,7 +46,7 @@ void main()
 
     }
     if (luminance == 1.0) {
-           
+
             float weight = (0.2126 * pass_Color.r + 0.7152 * pass_Color.g + 0.0722 * pass_Color.b) / 3.0;
             pass_Color = vec4(weight, weight, weight, 1.0);
     }

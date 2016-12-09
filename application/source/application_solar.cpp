@@ -147,15 +147,10 @@ void ApplicationSolar::create_scene() {
 }
 
 void ApplicationSolar::render() const {
-	// render to backbuffer:
-	// glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-  // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	// glEnable(GL_DEPTH_TEST);
 	glViewport(0, 0, 640, 480);
+	// render to backbuffer:
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 
 	// Draw for all predefined planets in planet_vector depending on their attributes
 	unsigned i = 1;
@@ -170,37 +165,28 @@ void ApplicationSolar::render() const {
 
 	//Stars:
 	uploadStarTransforms();
-	glUseProgram(m_shaders.at("planet").handle);
+
+
+
 	//swap buffers:
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// render screen quad:
+	glUseProgram(m_shaders.at("quad").handle);
 
-  // glUseProgram(m_shaders.at("quad").handle);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, quad_tex.handle);
 
-  // // tell quad.frag where to look for the quad texture
-  // glUniform1i(m_shaders.at("quad").u_locs.at("ColorTex"), 13);
-
-  // glBindVertexArray(quad_object.vertex_AO);
-  // glDrawArrays(quad_object.draw_mode, 0, quad_object.num_elements);
-  // // glDrawElements(quad_object.draw_mode, quad_object.num_elements, GL_UNSIGNED_BYTE, NULL);
-
-   glUseProgram(m_shaders.at("quad").handle);
-
-   glActiveTexture(GL_TEXTURE0);
-   glBindTexture(GL_TEXTURE_2D, quad_tex.handle);
-   glUniform1i(m_shaders.at("quad").u_locs.at("ColorTex"), 13);
-   glUniform1f(m_shaders.at("quad").u_locs.at("luminance"),		post_process[0]);
-   glUniform1f(m_shaders.at("quad").u_locs.at("vertical"),		post_process[1]);
-   glUniform1f(m_shaders.at("quad").u_locs.at("horizontal"),	post_process[2]);
-   glUniform1f(m_shaders.at("quad").u_locs.at("blur"),			post_process[3]);
-   glBindTexture(GL_TEXTURE_2D, quad_tex.handle);
-   glBindVertexArray(quad_object.vertex_AO);
-   glDrawArrays(GL_TRIANGLE_STRIP, 0, 6);
-  // glDrawElements(quad_object.draw_mode, quad_object.num_elements, GL_UNSIGNED_INT, NULL);
-
-
+	// tell quad.frag where to look for the quad texture:
+	glUniform1i(m_shaders.at("quad").u_locs.at("ColorTex"), 13);
+	glUniform1f(m_shaders.at("quad").u_locs.at("luminance"),		post_process[0]);
+	glUniform1f(m_shaders.at("quad").u_locs.at("vertical"),		post_process[1]);
+	glUniform1f(m_shaders.at("quad").u_locs.at("horizontal"),	post_process[2]);
+	glUniform1f(m_shaders.at("quad").u_locs.at("blur"),			post_process[3]);
+	glBindTexture(GL_TEXTURE_2D, quad_tex.handle);
+	glBindVertexArray(quad_object.vertex_AO);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
 void ApplicationSolar::updateView() {
@@ -456,21 +442,14 @@ void ApplicationSolar::initializeGeometry() {
 
 	//POSITION first Attribute on gpu
 	glEnableVertexAttribArray(0);
-
-	// glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-
-	// quad_object.draw_mode = GL_TRIANGLE_STRIP;
-	// quad_object.num_elements = GLsizei(squad_model.size());
-
 	glVertexAttribPointer(0, model::POSITION.components, model::POSITION.type, GL_FALSE, quad_model.vertex_bytes, quad_model.offsets[model::POSITION]);
 
-	glEnableVertexAttribArray(1);
 	// TEXCOORD second Attribute on gpu
+	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, model::TEXCOORD.components, model::TEXCOORD.type, GL_FALSE, quad_model.vertex_bytes, quad_model.offsets[model::TEXCOORD]);
 
 	quad_object.draw_mode = GL_TRIANGLE_STRIP;
-	quad_object.num_elements = GLsizei(sizeof(float) * squad_model.size());
-
+	quad_object.num_elements = GLsizei(squad_model.size());
 }
 
 
