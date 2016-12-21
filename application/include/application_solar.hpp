@@ -31,12 +31,14 @@ class ApplicationSolar : public Application {
   void initializeGeometry();
   void initializeTextures() const;
   void initializeFramebuffer();
+  void initializeUniformBuffer();
 
   void updateView();
   glm::fmat4 uploadPlanetTransforms(planet const&, const unsigned index, glm::fmat4 const&) const;
   void uploadStarTransforms() const;
 
   // cpu representation of model
+  camera_buffer cam_buffer;
   std::vector<planet_ptr> planet_vector;
   model_object planet_object;
   std::vector<star> star_vector;

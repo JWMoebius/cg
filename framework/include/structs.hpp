@@ -13,6 +13,11 @@
 // use gl definitions from glbinding
 using namespace gl;
 
+struct camera_buffer {
+  glm::fmat4 view_matrix;
+  glm::fmat4 projection_matrix;
+};
+
 
 //planet representation
 struct planet;

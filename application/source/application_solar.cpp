@@ -27,14 +27,16 @@ using namespace gl;
 
 ApplicationSolar::ApplicationSolar(std::string const& resource_path)
 	:Application{ resource_path }
-	, planet_object{}, planet_vector{}, star_object{}, quad_tex{}, renderbuffer{}, framebuffer{}, quad_object{}
+	, planet_object{}, planet_vector{}, star_object{}, quad_tex{}, renderbuffer{}, framebuffer{}, quad_object{}, cam_buffer{}
 {
 	create_scene();
+	cam_buffer.projection_matrix = m_view_projection;
 	glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
 	initializeTextures();
 	initializeFramebuffer();
 	initializeGeometry();
 	initializeShaderPrograms();
+	initializeUniformBuffer();
 }
 
 
@@ -192,18 +194,18 @@ void ApplicationSolar::render() const {
 void ApplicationSolar::updateView() {
 	// vertices are transformed in camera space, so camera transform must be inverted
 
-	glm::fmat4 view_matrix = glm::inverse(m_view_transform);
-	glm::fvec3 sun_pos = glm::fvec3(view_matrix * glm::fvec4{ 0.0, 0.0, 0.0, 1.0 });
+	cam_buffer.view_matrix = glm::inverse(m_view_transform);
+	glm::fvec3 sun_pos = glm::fvec3(cam_buffer.view_matrix * glm::fvec4{ 0.0, 0.0, 0.0, 1.0 });
 
 	// upload matrix to gpu
 	glUseProgram(m_shaders.at("planet").handle);
-	glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ViewMatrix"),
-		1, GL_FALSE, glm::value_ptr(view_matrix));
+//	glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ViewMatrix"),
+//		1, GL_FALSE, glm::value_ptr(cam_buffer.view_matrix));
 	glUniform3f(m_shaders.at("planet").u_locs.at("SunViewPos"), sun_pos.x, sun_pos.y, sun_pos.z);
 
 	glUseProgram(m_shaders.at("star").handle);
 	glUniformMatrix4fv(m_shaders.at("star").u_locs.at("ViewMatrix"),
-		1, GL_FALSE, glm::value_ptr(view_matrix));
+		1, GL_FALSE, glm::value_ptr(cam_buffer.view_matrix));
 
 	glUseProgram(m_shaders.at("planet").handle);
 
@@ -211,8 +213,8 @@ void ApplicationSolar::updateView() {
 
 void ApplicationSolar::updateProjection() {
 	// upload matrix to gpu
-	glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ProjectionMatrix"),
-		1, GL_FALSE, glm::value_ptr(m_view_projection));
+//	glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ProjectionMatrix"),
+//		1, GL_FALSE, glm::value_ptr(m_view_projection));
 
 	glUseProgram(m_shaders.at("star").handle);
 	glUniformMatrix4fv(m_shaders.at("star").u_locs.at("ProjectionMatrix"),
@@ -245,11 +247,37 @@ void ApplicationSolar::updateProjection() {
 	// glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, win_width, win_height);
 }
 
+
+
+void ApplicationSolar::initializeUniformBuffer() {
+
+	GLuint ubo_cam = 0;
+	//upload uniforms
+	unsigned int block_index = glGetUniformBlockIndex(m_shaders.at("planet").handle, "CameraBlock");
+	glGenBuffers(1, &ubo_cam);
+	glBindBufferBase(GL_UNIFORM_BUFFER, 0, ubo_cam); //Binding to index 0 because we only use one UBO
+	glBufferData(GL_UNIFORM_BUFFER, sizeof(cam_buffer), nullptr, GL_STATIC_DRAW);
+	GLuint location = glGetUniformBlockIndex(
+		m_shaders.at("planet").handle,
+		"CameraBlock");
+	glUniformBlockBinding(
+		m_shaders.at("planet").handle,
+		location,
+		0);
+	glBindBuffer(GL_UNIFORM_BUFFER, ubo_cam);
+	void* buffer_ptr = glMapBuffer(GL_UNIFORM_BUFFER,
+		GL_WRITE_ONLY);
+	std::memcpy(&cam_buffer, buffer_ptr, sizeof(cam_buffer));
+	glUnmapBuffer(GL_UNIFORM_BUFFER);
+}
+
+
 // update uniform locations
 void ApplicationSolar::uploadUniforms() {
 	updateUniformLocations();
 	glUseProgram(m_shaders.at("quad").handle);
 	glUseProgram(m_shaders.at("planet").handle);
+		
 	updateView();
 	updateProjection();
 }
@@ -333,8 +361,8 @@ void ApplicationSolar::initializeShaderPrograms() {
 	// request uniform locations for shader program
 	m_shaders.at("planet").u_locs["NormalMatrix"] = -1;
 	m_shaders.at("planet").u_locs["ModelMatrix"] = -1;
-	m_shaders.at("planet").u_locs["ViewMatrix"] = -1;
-	m_shaders.at("planet").u_locs["ProjectionMatrix"] = -1;
+//	m_shaders.at("planet").u_locs["ViewMatrix"] = -1;
+//	m_shaders.at("planet").u_locs["ProjectionMatrix"] = -1;
 	m_shaders.at("planet").u_locs["SunViewPos"] = -1;
 	m_shaders.at("planet").u_locs["ColorTex"] = -1;
 	m_shaders.at("planet").u_locs["NumPlanet"] = -1;
