@@ -27,10 +27,10 @@ using namespace gl;
 
 ApplicationSolar::ApplicationSolar(std::string const& resource_path)
 	:Application{ resource_path }
-	, planet_object{}, planet_vector{}, star_object{}, quad_tex{}, renderbuffer{}, framebuffer{}, quad_object{}, cam_buffer{}
+	, planet_object{}, planet_vector{}, star_object{}, quad_tex{}, renderbuffer{}, framebuffer{}, quad_object{}
 {
+	cam_buffer.view_matrix = m_view_transform;
 	create_scene();
-	cam_buffer.projection_matrix = m_view_projection;
 	glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
 	initializeTextures();
 	initializeFramebuffer();
@@ -39,6 +39,11 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
 	initializeUniformBuffer();
 }
 
+void ApplicationSolar::initializeUniformBuffer() {
+	//upload uniforms
+	glGenBuffers(1, &ubo_cam);
+	glBindBuffer(GL_UNIFORM_BUFFER, ubo_cam);		//Binding to index 0 because we only use one UBO
+}
 
 // Wait till confirmed working
 void ApplicationSolar::initializeFramebuffer() {
@@ -172,7 +177,7 @@ void ApplicationSolar::render() const {
 
 	//swap buffers:
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// render screen quad:
 	glUseProgram(m_shaders.at("quad").handle);
@@ -192,20 +197,46 @@ void ApplicationSolar::render() const {
 }
 
 void ApplicationSolar::updateView() {
+	cam_buffer.view_matrix = m_view_transform;
 	// vertices are transformed in camera space, so camera transform must be inverted
 
-	cam_buffer.view_matrix = glm::inverse(m_view_transform);
-	glm::fvec3 sun_pos = glm::fvec3(cam_buffer.view_matrix * glm::fvec4{ 0.0, 0.0, 0.0, 1.0 });
+	glm::fmat4 view_matrix = glm::inverse(m_view_transform);
+	glm::fvec3 sun_pos = glm::fvec3(view_matrix * glm::fvec4{ 0.0, 0.0, 0.0, 1.0 });
 
 	// upload matrix to gpu
 	glUseProgram(m_shaders.at("planet").handle);
-//	glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ViewMatrix"),
-//		1, GL_FALSE, glm::value_ptr(cam_buffer.view_matrix));
-	glUniform3f(m_shaders.at("planet").u_locs.at("SunViewPos"), sun_pos.x, sun_pos.y, sun_pos.z);
+	
+	GLuint index_camera_block = glGetUniformBlockIndex(m_shaders.at("planet").handle, // Get index for CameraBlock
+		"CameraBlock");
 
-	glUseProgram(m_shaders.at("star").handle);
-	glUniformMatrix4fv(m_shaders.at("star").u_locs.at("ViewMatrix"),
-		1, GL_FALSE, glm::value_ptr(cam_buffer.view_matrix));
+	GLint block_size;	//Size of CameraBlock
+	GLuint indices[2];	//Indíces of both elements of CameraBlock
+
+	glGetActiveUniformBlockiv(m_shaders.at("planet").handle, index_camera_block,  //Get size of CameraBlock
+		GL_UNIFORM_BLOCK_DATA_SIZE, &block_size);
+
+	GLubyte * block_represent = (GLubyte *)std::malloc(block_size);				//Reserve Space for CameraBlock
+
+	const GLchar *names[] = { "ProjectionMatrix", "ViewMatrix" };
+
+	glGetUniformIndices(m_shaders.at("planet").handle, 2, names, indices);
+	//Get offset for 
+	GLint offset[2];
+	glGetActiveUniformsiv(m_shaders.at("planet").handle, 2, indices,
+		GL_UNIFORM_OFFSET, offset);
+
+	//Copy to buffer projection and view_matrix data
+	std::memcpy(block_represent + offset[0], &cam_buffer.projection_matrix,
+		4 * 4 * sizeof(GLfloat));
+	std::memcpy(block_represent + offset[1], &view_matrix,
+		4 * 4 * sizeof(GLfloat));
+	//initialize buffer size
+	glBufferData(GL_UNIFORM_BUFFER, block_size, block_represent,
+		GL_DYNAMIC_DRAW);
+
+	glBindBufferBase(GL_UNIFORM_BUFFER, index_camera_block, ubo_cam);
+
+	glUniform3f(m_shaders.at("planet").u_locs.at("SunViewPos"), sun_pos.x, sun_pos.y, sun_pos.z);
 
 	glUseProgram(m_shaders.at("planet").handle);
 
@@ -213,14 +244,16 @@ void ApplicationSolar::updateView() {
 
 void ApplicationSolar::updateProjection() {
 	// upload matrix to gpu
-//	glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ProjectionMatrix"),
-//		1, GL_FALSE, glm::value_ptr(m_view_projection));
-
-	glUseProgram(m_shaders.at("star").handle);
-	glUniformMatrix4fv(m_shaders.at("star").u_locs.at("ProjectionMatrix"),
+	/*glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ProjectionMatrix"),
 		1, GL_FALSE, glm::value_ptr(m_view_projection));
-	glUseProgram(m_shaders.at("planet").handle);
+		*/
+	cam_buffer.projection_matrix = m_view_projection;
+	glUseProgram(m_shaders.at("star").handle);
 
+
+
+	glUseProgram(m_shaders.at("planet").handle);
+	
 	// m_window is hidden in launcher!
 	// int win_width, win_height;
 	// glfwGetWindowSize(m_window, &win_width, &win_height);
@@ -247,37 +280,11 @@ void ApplicationSolar::updateProjection() {
 	// glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, win_width, win_height);
 }
 
-
-
-void ApplicationSolar::initializeUniformBuffer() {
-
-	GLuint ubo_cam = 0;
-	//upload uniforms
-	unsigned int block_index = glGetUniformBlockIndex(m_shaders.at("planet").handle, "CameraBlock");
-	glGenBuffers(1, &ubo_cam);
-	glBindBufferBase(GL_UNIFORM_BUFFER, 0, ubo_cam); //Binding to index 0 because we only use one UBO
-	glBufferData(GL_UNIFORM_BUFFER, sizeof(cam_buffer), nullptr, GL_STATIC_DRAW);
-	GLuint location = glGetUniformBlockIndex(
-		m_shaders.at("planet").handle,
-		"CameraBlock");
-	glUniformBlockBinding(
-		m_shaders.at("planet").handle,
-		location,
-		0);
-	glBindBuffer(GL_UNIFORM_BUFFER, ubo_cam);
-	void* buffer_ptr = glMapBuffer(GL_UNIFORM_BUFFER,
-		GL_WRITE_ONLY);
-	std::memcpy(&cam_buffer, buffer_ptr, sizeof(cam_buffer));
-	glUnmapBuffer(GL_UNIFORM_BUFFER);
-}
-
-
 // update uniform locations
 void ApplicationSolar::uploadUniforms() {
 	updateUniformLocations();
 	glUseProgram(m_shaders.at("quad").handle);
 	glUseProgram(m_shaders.at("planet").handle);
-		
 	updateView();
 	updateProjection();
 }
@@ -361,8 +368,6 @@ void ApplicationSolar::initializeShaderPrograms() {
 	// request uniform locations for shader program
 	m_shaders.at("planet").u_locs["NormalMatrix"] = -1;
 	m_shaders.at("planet").u_locs["ModelMatrix"] = -1;
-//	m_shaders.at("planet").u_locs["ViewMatrix"] = -1;
-//	m_shaders.at("planet").u_locs["ProjectionMatrix"] = -1;
 	m_shaders.at("planet").u_locs["SunViewPos"] = -1;
 	m_shaders.at("planet").u_locs["ColorTex"] = -1;
 	m_shaders.at("planet").u_locs["NumPlanet"] = -1;
@@ -370,8 +375,6 @@ void ApplicationSolar::initializeShaderPrograms() {
 	// star uniforms:
 	m_shaders.emplace("star", shader_program{ m_resource_path + "shaders/star.vert",
 		m_resource_path + "shaders/star.frag" });
-	m_shaders.at("star").u_locs["ViewMatrix"] = -1;
-	m_shaders.at("star").u_locs["ProjectionMatrix"] = -1;
 	m_shaders.at("star").u_locs["ModelMatrix"] = -1;
 
 	// quad uniform:
@@ -498,7 +501,8 @@ void ApplicationSolar::initializeTextures() const {
 
 
 glm::fmat4 ApplicationSolar::uploadPlanetTransforms(planet const& pl, const unsigned index, glm::fmat4 const& parent_mat) const {
-	glUseProgram(m_shaders.at("planet").handle);
+
+	glUseProgram(m_shaders.at("planet").handle); 
 
 	// glm::fmat4 parent_pos = glm::translate(glm::fmat4{}, glm::fvec3(parent_mat[3]));
 	glm::fmat4 model_matrix = glm::rotate(parent_mat, float(glfwGetTime()) * pl.rotation_velocity, glm::fvec3{ 0.0f, 1.0f, 0.0f });

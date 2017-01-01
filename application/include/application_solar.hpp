@@ -25,6 +25,7 @@ class ApplicationSolar : public Application {
   void mouseCallback(double pos_x, double pos_y);
   // draw all objects
   void render() const;
+  void set_projectionCamBuffer();
 
  protected:
   void initializeShaderPrograms();
@@ -38,6 +39,8 @@ class ApplicationSolar : public Application {
   void uploadStarTransforms() const;
 
   // cpu representation of model
+
+  GLuint ubo_cam;
   camera_buffer cam_buffer;
   std::vector<planet_ptr> planet_vector;
   model_object planet_object;

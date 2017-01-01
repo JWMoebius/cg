@@ -13,11 +13,11 @@
 // use gl definitions from glbinding
 using namespace gl;
 
+//camera representation
 struct camera_buffer {
   glm::fmat4 view_matrix;
   glm::fmat4 projection_matrix;
 };
-
 
 //planet representation
 struct planet;
@@ -78,6 +78,6 @@ struct shader_program {
   // object handle
   GLuint handle;
   // uniform locations mapped to name
-  std::map<std::string, GLint> u_locs{};
+  std::map<std::string, GLuint> u_locs{};
 };
 #endif
